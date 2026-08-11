@@ -1,5 +1,4 @@
 import { Router, Request, Response } from "express";
-import fetch from "node-fetch";
 
 const router = Router();
 const TBA_BASE = "https://www.thebluealliance.com/api/v3";

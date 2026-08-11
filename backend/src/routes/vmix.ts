@@ -1,5 +1,4 @@
 import { Router, Request, Response } from "express";
-import fetch from "node-fetch";
 import { parseStringPromise } from "xml2js";
 
 const router = Router();
@@ -18,7 +17,7 @@ router.get("/status", async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Missing 'host' query param (set vMix host in Settings)" });
   }
   try {
-    const r = await fetch(base, { timeout: 4000 } as any);
+    const r = await fetch(base, { signal: AbortSignal.timeout(4000) });
     if (!r.ok) {
       return res.status(502).json({ error: `vMix responded with status ${r.status}` });
     }
@@ -67,7 +66,7 @@ router.post("/command", async (req: Request, res: Response) => {
   if (value) params.set("Value", String(value));
 
   try {
-    const r = await fetch(`${base}/?${params.toString()}`, { timeout: 4000 } as any);
+    const r = await fetch(`${base}/?${params.toString()}`, { signal: AbortSignal.timeout(4000) });
     if (!r.ok) {
       return res.status(502).json({ error: `vMix responded with status ${r.status}` });
     }
