@@ -4,9 +4,10 @@ A single-screen dashboard for FIRST Robotics Competition live commentary teams.
 
 Panels:
 - **YouTube Live Chat** — embed of the stream's live chat
-- **Match Schedule** — upcoming matches with team numbers/names, pulled from The Blue Alliance
-- **vMix Status & Control** — shows current program/preview input and tally, lets you trigger cuts/overlays (covers telestrator & replay since those run inside vMix)
-- **Alerts** — a "Producer" view to send preset or custom messages (e.g. "wrap up") to a big-banner "Commentator" view
+- **Match Schedule / Match Browser** — upcoming and past matches with team numbers/names, pulled from The Blue Alliance. The Commentator View's browser lets you step back through completed matches or peek ahead with Previous/Next.
+- **Telestrator** — embedded directly in the Commentator View, so commentators can draw on it without a separate tab. vMix serves this from the same address as its API (default `http://<vmix host>:8088/telestrator/`); no separate setup needed beyond your vMix host in Settings.
+- **vMix Status** — read-only tally showing what's on program/preview and recording status. There are no cut/switch controls here on purpose — that stays in vMix itself with whoever's on the board.
+- **Alerts** — a "Producer" view to send preset or custom messages (e.g. "wrap up") to the Commentator View, where they appear as a banner without covering the chat/telestrator/matches underneath.
 
 **No API keys or IPs are hard-coded anywhere in the code.** Everything (TBA API key, event key, vMix host/port, YouTube video ID) is entered in the in-app **Settings** menu and saved to your browser's local storage. You can change any of it at any time without redeploying.
 
@@ -60,6 +61,7 @@ Click **Settings** (top right) and fill in:
 | TBA Event Key | e.g. `2026miket` — found in the URL of your event on thebluealliance.com |
 | vMix Host | IP address of the vMix PC on the local network, e.g. `192.168.1.50` |
 | vMix Port | Default vMix web controller port is `8088` |
+| Telestrator URL (optional) | Leave blank — it's auto-derived as `http://<vMix Host>:<vMix Port>/telestrator/`. Only set this if your telestrator lives somewhere non-standard. |
 
 Settings save automatically and persist between sessions (per browser). Each teammate opening the app on their own laptop will need to enter these once too.
 

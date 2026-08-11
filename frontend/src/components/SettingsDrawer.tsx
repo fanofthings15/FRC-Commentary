@@ -71,6 +71,14 @@ export function SettingsDrawer({ settings, onChange, onClose }: Props) {
         />
 
         <Field
+          label="Telestrator URL (optional)"
+          hint="Leave blank to auto-use http://<vMix host>:<port>/telestrator/"
+          value={settings.telestratorUrl}
+          onChange={(v) => onChange({ telestratorUrl: v })}
+          placeholder="http://192.168.25.22:8088/telestrator/"
+        />
+
+        <Field
           label="Backend URL"
           hint="Where this app's backend server is running"
           value={settings.backendUrl}

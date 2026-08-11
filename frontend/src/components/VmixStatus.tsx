@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Settings, VmixStatus as VmixStatusType } from "../types";
 
+// Read-only status display. Cutting/switching is handled directly in vMix by
+// whoever's running the board — this panel is just so the rest of the team
+// can see what's on program/preview without needing their own vMix window open.
 export function VmixStatus({ settings }: { settings: Settings }) {
   const [status, setStatus] = useState<VmixStatusType | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,21 +30,8 @@ export function VmixStatus({ settings }: { settings: Settings }) {
     return () => clearInterval(interval);
   }, [load]);
 
-  const sendCommand = useCallback(
-    async (fn: string, input?: string) => {
-      const url = new URL(`${settings.backendUrl}/api/vmix/command`);
-      url.searchParams.set("host", settings.vmixHost);
-      url.searchParams.set("port", settings.vmixPort || "8088");
-      url.searchParams.set("function", fn);
-      if (input) url.searchParams.set("input", input);
-      await fetch(url.toString(), { method: "POST" });
-      load();
-    },
-    [settings.vmixHost, settings.vmixPort, settings.backendUrl, load]
-  );
-
   if (!settings.vmixHost) {
-    return <div className="empty-state">Add your vMix host IP in Settings to see live status and controls.</div>;
+    return <div className="empty-state">Add your vMix host IP in Settings to see live status.</div>;
   }
 
   return (
@@ -53,11 +43,11 @@ export function VmixStatus({ settings }: { settings: Settings }) {
 
       {status && (
         <>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-            <button className="btn danger" onClick={() => sendCommand("Cut")}>Cut</button>
-            <button className="btn" onClick={() => sendCommand("Fade", "500")}>Fade</button>
-            <button className="btn" onClick={() => sendCommand("StartRecording")}>Start Rec</button>
-            <button className="btn" onClick={() => sendCommand("StopRecording")}>Stop Rec</button>
+          <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+            <span className="small-note">
+              {status.recording ? "● Recording" : "Not recording"}
+              {status.streaming ? " · ● Streaming" : ""}
+            </span>
           </div>
 
           <div className="vmix-inputs">
@@ -75,17 +65,11 @@ export function VmixStatus({ settings }: { settings: Settings }) {
                   <span style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     {isProgram && <span className="badge program">PGM</span>}
                     {isPreview && <span className="badge preview">PVW</span>}
-                    <button className="btn" onClick={() => sendCommand("PreviewInput", input.number)}>PVW</button>
-                    <button className="btn" onClick={() => sendCommand("CutDirect", input.number)}>Cut To</button>
                   </span>
                 </div>
               );
             })}
           </div>
-          <p className="small-note" style={{ marginTop: 10 }}>
-            Telestrator and replay inputs (if named as such in vMix) appear in this list like any other source —
-            preview or cut to them the same way.
-          </p>
         </>
       )}
     </div>

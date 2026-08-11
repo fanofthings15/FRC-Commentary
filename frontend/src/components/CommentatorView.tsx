@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Settings } from "../types";
+import { Settings, resolveTelestratorUrl } from "../types";
 import { useAlertsSocket } from "../hooks/useAlertsSocket";
-import { YouTubeChat } from "./YouTubeChat";
-import { MatchBrowser } from "./MatchBrowser";
+import { TelestratorFrame } from "./TelestratorFrame";
+import { CompactSidebar } from "./CompactSidebar";
 
 export function CommentatorView({ settings }: { settings: Settings }) {
   const { connected, lastAlert } = useAlertsSocket(settings.backendUrl);
@@ -14,6 +14,8 @@ export function CommentatorView({ settings }: { settings: Settings }) {
     const timeout = setTimeout(() => setVisible(false), 8000);
     return () => clearTimeout(timeout);
   }, [lastAlert]);
+
+  const telestratorUrl = resolveTelestratorUrl(settings);
 
   return (
     <div className="commentator-shell">
@@ -33,19 +35,14 @@ export function CommentatorView({ settings }: { settings: Settings }) {
       )}
 
       <div className="commentator-grid">
-        <div className="panel commentator-panel">
-          <div className="panel-header"><h2>Stream Chat</h2></div>
+        <div className="panel commentator-main">
+          <div className="panel-header"><h2>Telestrator</h2></div>
           <div className="panel-body" style={{ padding: 0, flex: 1 }}>
-            <YouTubeChat videoId={settings.youtubeVideoId} height="100%" />
+            <TelestratorFrame url={telestratorUrl} />
           </div>
         </div>
 
-        <div className="panel commentator-panel">
-          <div className="panel-header"><h2>Match Browser</h2></div>
-          <div className="panel-body">
-            <MatchBrowser settings={settings} />
-          </div>
-        </div>
+        <CompactSidebar settings={settings} />
       </div>
     </div>
   );
