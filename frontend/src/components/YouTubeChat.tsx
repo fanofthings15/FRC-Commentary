@@ -1,6 +1,6 @@
 import React from "react";
 
-export function YouTubeChat({ videoId }: { videoId: string }) {
+export function YouTubeChat({ videoId, height }: { videoId: string; height?: number | string }) {
   if (!videoId) {
     return (
       <div className="empty-state">
@@ -10,7 +10,15 @@ export function YouTubeChat({ videoId }: { videoId: string }) {
   }
 
   const domain = typeof window !== "undefined" ? window.location.hostname : "localhost";
-  const src = `https://www.youtube.com/live_chat?v=${encodeURIComponent(videoId)}&embed_domain=${domain}`;
+  // dark_theme=1 forces YouTube's dark chat skin (light text on dark background).
+  // Without this, some browser/OS theme combinations serve a broken light-on-light
+  // style inside the iframe.
+  const src = `https://www.youtube.com/live_chat?v=${encodeURIComponent(videoId)}&embed_domain=${domain}&dark_theme=1`;
 
-  return <iframe className="chat-frame" src={src} title="YouTube live chat" />;
+  return (
+    <div className="chat-frame-wrap" style={height ? { height } : undefined}>
+      <iframe className="chat-frame" src={src} title="YouTube live chat" />
+    </div>
+  );
 }
+
