@@ -1,29 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 import { Settings } from "../types";
 import { YouTubeChat } from "./YouTubeChat";
 import { MatchBrowser } from "./MatchBrowser";
 
-type Tab = "chat" | "matches";
-
+// Matches on top, chat pinned to the bottom half — both always visible,
+// no tab-switching needed.
 export function CompactSidebar({ settings }: { settings: Settings }) {
-  const [tab, setTab] = useState<Tab>("matches");
-
   return (
-    <div className="panel commentator-sidebar">
-      <div className="sidebar-tabs">
-        <button className={tab === "matches" ? "active" : ""} onClick={() => setTab("matches")}>
-          Matches
-        </button>
-        <button className={tab === "chat" ? "active" : ""} onClick={() => setTab("chat")}>
-          Chat
-        </button>
-      </div>
-      <div className="panel-body sidebar-body">
-        {tab === "matches" ? (
+    <div className="commentator-sidebar-stack">
+      <div className="panel sidebar-half">
+        <div className="panel-header"><h2>Matches</h2></div>
+        <div className="panel-body sidebar-half-body">
           <MatchBrowser settings={settings} />
-        ) : (
+        </div>
+      </div>
+
+      <div className="panel sidebar-half">
+        <div className="panel-header"><h2>Chat</h2></div>
+        <div className="panel-body sidebar-half-body" style={{ padding: 0 }}>
           <YouTubeChat videoId={settings.youtubeVideoId} height="100%" />
-        )}
+        </div>
       </div>
     </div>
   );
