@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Settings, resolveTelestratorUrl } from "../types";
+import { Settings } from "../types";
 import { useAlertsSocket } from "../hooks/useAlertsSocket";
-import { TelestratorFrame } from "./TelestratorFrame";
-import { CompactSidebar } from "./CompactSidebar";
+import { TelestratorLauncher } from "./TelestratorLauncher";
+import { YouTubeChat } from "./YouTubeChat";
+import { MatchBrowser } from "./MatchBrowser";
 
 export function CommentatorView({ settings }: { settings: Settings }) {
   const { connected, lastAlert } = useAlertsSocket(settings.backendUrl);
@@ -14,8 +15,6 @@ export function CommentatorView({ settings }: { settings: Settings }) {
     const timeout = setTimeout(() => setVisible(false), 8000);
     return () => clearTimeout(timeout);
   }, [lastAlert]);
-
-  const telestratorUrl = resolveTelestratorUrl(settings);
 
   return (
     <div className="commentator-shell">
@@ -34,15 +33,24 @@ export function CommentatorView({ settings }: { settings: Settings }) {
         </div>
       )}
 
+      <div className="panel commentator-toolbar-panel">
+        <TelestratorLauncher settings={settings} />
+      </div>
+
       <div className="commentator-grid">
-        <div className="panel commentator-main">
-          <div className="panel-header"><h2>Telestrator</h2></div>
+        <div className="panel commentator-half">
+          <div className="panel-header"><h2>Stream Chat</h2></div>
           <div className="panel-body" style={{ padding: 0, flex: 1 }}>
-            <TelestratorFrame url={telestratorUrl} />
+            <YouTubeChat videoId={settings.youtubeVideoId} height="100%" />
           </div>
         </div>
 
-        <CompactSidebar settings={settings} />
+        <div className="panel commentator-half">
+          <div className="panel-header"><h2>Match Browser</h2></div>
+          <div className="panel-body" style={{ flex: 1, overflowY: "auto" }}>
+            <MatchBrowser settings={settings} />
+          </div>
+        </div>
       </div>
     </div>
   );
