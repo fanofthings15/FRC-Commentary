@@ -14,7 +14,7 @@ export const DEFAULT_SETTINGS: Settings = {
   tbaEventKey: "",
   vmixHost: "",
   vmixPort: "8088",
-  backendUrl: "http://localhost:4000",
+  backendUrl: "http://localhost:48213",
   telestratorUrl: "",
 };
 
@@ -30,6 +30,16 @@ export function resolveTelestratorUrl(settings: Settings): string {
 export interface TeamRef {
   number: string;
   name: string;
+  hometown?: string;
+}
+
+export interface RankingEntry {
+  rank: number;
+  teamNumber: string;
+  wins: number | null;
+  losses: number | null;
+  ties: number | null;
+  played: number | null;
 }
 
 export interface MatchInfo {

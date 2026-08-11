@@ -83,7 +83,7 @@ export function SettingsDrawer({ settings, onChange, onClose }: Props) {
           hint="Where this app's backend server is running"
           value={settings.backendUrl}
           onChange={(v) => onChange({ backendUrl: v })}
-          placeholder="http://localhost:4000"
+          placeholder="http://localhost:48213"
         />
 
         <button className="btn primary" onClick={onClose} style={{ width: "100%", marginTop: 8 }}>

@@ -16,7 +16,7 @@ app.use("/api/tba", tbaRouter);
 const server = http.createServer(app);
 attachAlertsWebSocket(server);
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 48213;
 server.listen(PORT, () => {
   console.log(`FRC Commentary backend listening on http://localhost:${PORT}`);
   console.log(`Alerts WebSocket at ws://localhost:${PORT}/ws/alerts`);

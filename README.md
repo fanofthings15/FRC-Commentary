@@ -40,7 +40,7 @@ cd backend
 bun install
 bun run dev
 ```
-Runs on http://localhost:4000
+Runs on http://localhost:48213
 
 **Frontend:**
 ```bash
