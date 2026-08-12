@@ -61,7 +61,6 @@ function BracketNode({
 }) {
   return (
     <div className={`bracket-node ${isCurrent ? "current" : ""}`} ref={refCb}>
-      {isCurrent && <div className="bracket-here-tag">YOU ARE HERE</div>}
       <div className="bracket-node-title">{title}</div>
       <div className={`bracket-node-row red ${played && redWon ? "won" : ""}`}>
         <span className="bracket-node-left">
@@ -212,7 +211,6 @@ export function PlayoffBracket({
                 className={`bracket-card ${isCurrent ? "current" : ""}`}
                 ref={isCurrent ? currentCardRef : undefined}
               >
-                {isCurrent && <div className="bracket-here-tag">YOU ARE HERE</div>}
                 <div className="bracket-card-label">
                   {compLevelLabel(m.compLevel)} #{matchDisplayNumber(m)}
                   {m.played && m.winner && (
