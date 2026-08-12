@@ -2,7 +2,7 @@
   "name": "frc-commentary",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["backend", "frontend"],
+  "workspaces": ["shared", "backend", "frontend"],
   "scripts": {
     "dev": "bun run ./scripts/dev.ts",
     "dev:backend": "cd backend && bun run dev",

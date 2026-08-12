@@ -22,10 +22,24 @@ Panels:
 
 ```
 frc-commentary/
+  shared/      Types shared between the backend and frontend, defined once as Zod schemas
   backend/     Express + TypeScript API (proxies vMix + The Blue Alliance, hosts the alerts WebSocket, serves the built frontend)
   frontend/    React + TypeScript (Vite) dashboard UI
   scripts/     dev.ts (runs both dev servers together) and zip-ui.ts (packages the built UI for the .exe)
 ```
+
+### Shared types (`shared/`)
+
+Anything that travels between the backend and the frontend (a match, the vMix
+status, the settings, an alert) is described in one place: `shared/src`. Each
+shape is a small [Zod](https://zod.dev) schema, and we get both the TypeScript
+type and a runtime validator from that one definition, so the two sides can't
+drift apart.
+
+To add or change a field, edit the schema in `shared/src` and let the compiler
+point you at the spots to update on each side. The backend uses the schemas to
+validate incoming data (the settings you save, messages off the alerts socket);
+the frontend just imports the types. No code generation step to remember.
 
 ## Dev vs. prod — how this actually works
 

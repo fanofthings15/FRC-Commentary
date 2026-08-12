@@ -1,11 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server } from "http";
-
-export interface AlertMessage {
-  type: "alert";
-  text: string;
-  sentAt: number;
-}
+import { incomingAlertSchema, type AlertMessage } from "frc-commentary-shared";
 
 export function attachAlertsWebSocket(server: Server) {
   const wss = new WebSocketServer({ server, path: "/ws/alerts" });
@@ -15,19 +10,23 @@ export function attachAlertsWebSocket(server: Server) {
     clients.add(ws);
 
     ws.on("message", (data) => {
-      let msg: AlertMessage;
+      let raw: unknown;
       try {
-        msg = JSON.parse(data.toString());
+        raw = JSON.parse(data.toString());
       } catch {
         return;
       }
-      if (msg.type !== "alert" || typeof msg.text !== "string") return;
+      // Only accept well-formed { type: "alert", text } messages; ignore
+      // anything else rather than trusting the socket.
+      const parsed = incomingAlertSchema.safeParse(raw);
+      if (!parsed.success) return;
 
-      const payload = JSON.stringify({
+      const message: AlertMessage = {
         type: "alert",
-        text: msg.text,
+        text: parsed.data.text,
         sentAt: Date.now(),
-      });
+      };
+      const payload = JSON.stringify(message);
 
       for (const client of clients) {
         if (client.readyState === WebSocket.OPEN) {

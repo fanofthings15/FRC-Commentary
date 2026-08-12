@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import type { MatchInfo, RankingEntry, AllianceEntry } from "frc-commentary-shared";
 import type {
   MatchSimple,
   TeamSimple,
@@ -49,7 +50,7 @@ router.get("/matches", async (req: Request, res: Response) => {
       };
     }
 
-    const cleaned = matches
+    const cleaned: MatchInfo[] = matches
       .slice()
       .sort((a, b) => (a.time || a.predicted_time || 0) - (b.time || b.predicted_time || 0))
       .map((m) => ({
@@ -93,7 +94,7 @@ router.get("/rankings", async (req: Request, res: Response) => {
       return res.status(r.status).json({ error: "TBA rejected the request. Check your API key and event key." });
     }
     const data = (await r.json()) as EventRankings | null;
-    const rankings = (data?.rankings || []).map((rk) => ({
+    const rankings: RankingEntry[] = (data?.rankings || []).map((rk) => ({
       rank: rk.rank,
       teamNumber: String(rk.team_key || "").replace("frc", ""),
       wins: rk.record?.wins ?? null,
@@ -134,7 +135,7 @@ router.get("/alliances", async (req: Request, res: Response) => {
       nameByKey[t.key] = t.nickname || t.name || t.key;
     }
 
-    const cleaned = alliances.map((a, idx) => ({
+    const cleaned: AllianceEntry[] = alliances.map((a, idx) => ({
       number: idx + 1,
       name: a.name || `Alliance ${idx + 1}`,
       teams: (a.picks || []).map((tk) => ({
