@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { parseStringPromise } from "xml2js";
+import type { VmixStatus } from "frc-commentary-shared";
 import { queryString, errorMessage } from "../util.js";
 
 const router = Router();
@@ -51,7 +52,7 @@ router.get("/status", async (req: Request, res: Response) => {
     const inputsRaw = vmix.inputs?.input;
     const inputs: VmixInputXml[] = Array.isArray(inputsRaw) ? inputsRaw : inputsRaw ? [inputsRaw] : [];
 
-    res.json({
+    const status: VmixStatus = {
       active: vmix.active,
       preview: vmix.preview,
       recording: vmix.recording === "True",
@@ -64,7 +65,8 @@ router.get("/status", async (req: Request, res: Response) => {
         title: i.$?.title || i._,
         state: i.$?.state,
       })),
-    });
+    };
+    res.json(status);
   } catch (err) {
     res.status(502).json({ error: `Could not reach vMix at ${base}. Check host/port/network. (${errorMessage(err)})` });
   }
