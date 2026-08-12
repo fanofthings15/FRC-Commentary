@@ -17,24 +17,24 @@ function labelSuffix(status: HealthStatus): string {
 export function ConnectionHealthStrip({ settings }: { settings: Settings }) {
   const { backend, tba, vmix, alerts } = useConnectionHealth(settings);
 
+  const items: { key: string; label: string; status: HealthStatus }[] = [
+    { key: "backend", label: "Backend", status: backend },
+    { key: "tba", label: "TBA", status: tba },
+    { key: "vmix", label: "vMix", status: vmix },
+    { key: "alerts", label: "Alerts", status: alerts },
+  ];
+
   return (
     <div className="health-strip">
-      <span>
-        <span className={`status-dot ${dotClass(backend)}`} />
-        Backend{labelSuffix(backend)}
-      </span>
-      <span>
-        <span className={`status-dot ${dotClass(tba)}`} />
-        TBA{labelSuffix(tba)}
-      </span>
-      <span>
-        <span className={`status-dot ${dotClass(vmix)}`} />
-        vMix{labelSuffix(vmix)}
-      </span>
-      <span>
-        <span className={`status-dot ${dotClass(alerts)}`} />
-        Alerts{labelSuffix(alerts)}
-      </span>
+      {items.map((item) => (
+        <span key={item.key} title={`${item.label}${labelSuffix(item.status)}`}>
+          <span className={`status-dot ${dotClass(item.status)}`} />
+          <span className="health-strip-label">
+            {item.label}
+            {labelSuffix(item.status)}
+          </span>
+        </span>
+      ))}
     </div>
   );
 }

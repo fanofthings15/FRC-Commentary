@@ -49,6 +49,8 @@ a {
 .topbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
   justify-content: space-between;
   padding: 14px 22px;
   border-bottom: 1px solid var(--panel-border);
@@ -902,6 +904,8 @@ a {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
   font-size: 13px;
   flex-shrink: 0;
 }
@@ -958,7 +962,8 @@ a {
 .telestrator-launcher {
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 10px 14px;
 }
 
 /* Alert overlay - floats above the one-stop view without hiding chat/matches */
@@ -1351,4 +1356,101 @@ a {
 
 .event-switch-empty {
   padding: 6px 8px;
+}
+
+/* ============================================================
+   Phones and small tablets. Everything above this point uses
+   the 980px breakpoint for the two big layout grids (Dashboard,
+   Commentator View) - this block handles the finer-grained stuff
+   those breakpoints don't touch: header bars overflowing, tap
+   targets being too small to reliably hit with a finger, and a
+   few grids/tables that need to reflow rather than just shrink.
+   ============================================================ */
+@media (max-width: 640px) {
+  .topbar {
+    padding: 10px 14px;
+  }
+
+  .brand {
+    font-size: 15px;
+  }
+
+  .topbar nav a,
+  .topbar nav button {
+    font-size: 12.5px;
+    padding: 9px 10px;
+  }
+
+  /* Dot-only on narrow screens - full label is still available via the
+     title attribute (tap-and-hold on touch, hover on anything with a
+     pointer). Four full labels plus dots simply don't fit next to the
+     brand and nav on a phone-width screen. */
+  .health-strip-label {
+    display: none;
+  }
+
+  .health-strip {
+    gap: 8px;
+  }
+
+  .main-grid {
+    padding: 12px 14px 20px;
+  }
+
+  .commentator-shell {
+    padding: 10px 12px 16px;
+  }
+
+  /* Bigger tap targets - the desktop sizing is fine for a mouse cursor
+     but too small to reliably hit with a finger. */
+  .btn {
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+
+  .team-link {
+    padding: 4px 9px;
+  }
+
+  .browser-tabs button {
+    font-size: 10.5px;
+    padding: 10px 2px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Red/blue/VS as three cramped side-by-side columns stops being
+     readable once each column is under ~110px - stack them instead. */
+  .match-browser-alliances {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .match-browser-vs {
+    text-align: center;
+  }
+
+  /* Safety net - if content ever doesn't fit the available width
+     (long team names, a lot of rank/OPR text), scroll rather than
+     silently clip or overlap. */
+  .rankings-table {
+    overflow-x: auto;
+  }
+
+  .event-switch-current {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+
+  .on-deck-item {
+    min-width: 100px;
+  }
+
+  .settings-drawer {
+    width: 100%;
+    padding: 18px 16px;
+  }
+
+  .team-popup {
+    padding: 18px 16px;
+  }
 }
