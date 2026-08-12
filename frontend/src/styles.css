@@ -1191,6 +1191,34 @@ a {
   font-family: var(--font-mono);
   font-weight: 700;
   color: var(--accent);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.head-to-head-score:hover {
+  border-color: var(--accent);
+  background: rgba(226, 161, 58, 0.1);
+}
+
+.head-to-head-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 2px 0 8px;
+  padding: 6px 10px;
+  background: #0f1319;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+
+.head-to-head-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-family: var(--font-mono);
 }
 
 .h2h-red {
