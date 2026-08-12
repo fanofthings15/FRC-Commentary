@@ -537,6 +537,143 @@ a {
   color: #7fb8ff;
 }
 
+/* Playoff bracket */
+.bracket-rounds {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 168px;
+  flex-shrink: 0;
+}
+
+.bracket-round-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.bracket-card {
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: #0f1319;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.bracket-card.played {
+  border-color: var(--panel-border);
+}
+
+.bracket-card-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.bracket-card-alliance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.bracket-card-alliance.red { color: #ff8577; }
+.bracket-card-alliance.blue { color: #7fb8ff; }
+
+.bracket-team {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12.5px;
+}
+
+.bracket-tbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.bracket-flavor {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--panel-border);
+  font-size: 10.5px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.bracket-fallback-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Alliances tab */
+.alliances-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.alliance-card {
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: #0f1319;
+  padding: 10px 12px;
+}
+
+.alliance-card-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.alliance-card-team {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12.5px;
+  margin-bottom: 4px;
+}
+
+.alliance-card-team .num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.alliance-card-team .name {
+  color: var(--text-dim);
+  font-size: 11.5px;
+}
+
+.alliance-captain-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
 /* Commentator one-stop-shop layout */
 .commentator-shell {
   height: 100vh;

@@ -42,6 +42,12 @@ export interface RankingEntry {
   played: number | null;
 }
 
+export interface AllianceEntry {
+  number: number;
+  name: string;
+  teams: { number: string; name: string }[];
+}
+
 export interface MatchInfo {
   key: string;
   matchNumber: number;

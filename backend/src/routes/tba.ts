@@ -101,4 +101,50 @@ router.get("/rankings", async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/tba/alliances?eventKey=2026miket&apiKey=...
+router.get("/alliances", async (req: Request, res: Response) => {
+  const eventKey = req.query.eventKey as string | undefined;
+  const apiKey = req.query.apiKey as string | undefined;
+
+  if (!eventKey || !apiKey) {
+    return res.status(400).json({ error: "Missing 'eventKey' or 'apiKey' (set both in Settings)" });
+  }
+
+  try {
+    const [allianceResp, teamsResp] = await Promise.all([
+      fetch(`${TBA_BASE}/event/${eventKey}/alliances`, {
+        headers: { "X-TBA-Auth-Key": apiKey },
+      }),
+      fetch(`${TBA_BASE}/event/${eventKey}/teams/simple`, {
+        headers: { "X-TBA-Auth-Key": apiKey },
+      }),
+    ]);
+
+    if (!allianceResp.ok) {
+      return res.status(allianceResp.status).json({ error: "TBA rejected the request. Check your API key and event key." });
+    }
+
+    const alliances = await allianceResp.json();
+    const teams = teamsResp.ok ? await teamsResp.json() : [];
+
+    const nameByKey: Record<string, string> = {};
+    for (const t of teams as any[]) {
+      nameByKey[t.key] = t.nickname || t.name || t.key;
+    }
+
+    const cleaned = ((alliances as any[]) || []).map((a, idx) => ({
+      number: idx + 1,
+      name: a.name || `Alliance ${idx + 1}`,
+      teams: (a.picks || []).map((tk: string) => ({
+        number: tk.replace("frc", ""),
+        name: nameByKey[tk] || "",
+      })),
+    }));
+
+    res.json({ alliances: cleaned });
+  } catch (err: any) {
+    res.status(502).json({ error: `Could not reach The Blue Alliance. (${err.message})` });
+  }
+});
+
 export default router;

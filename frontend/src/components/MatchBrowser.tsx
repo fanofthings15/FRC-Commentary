@@ -3,8 +3,10 @@ import { Settings } from "../types";
 import { useMatches } from "../hooks/useMatches";
 import { compLevelLabel } from "../matchLabels";
 import { RankingsTable } from "./RankingsTable";
+import { PlayoffBracket } from "./PlayoffBracket";
+import { AlliancesList } from "./AlliancesList";
 
-type Tab = "match" | "rankings";
+type Tab = "match" | "rankings" | "playoffs" | "alliances";
 
 export function MatchBrowser({ settings }: { settings: Settings }) {
   const { matches, error, loading, reload } = useMatches(settings);
@@ -52,6 +54,12 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
         </button>
         <button className={tab === "rankings" ? "active" : ""} onClick={() => setTab("rankings")}>
           Rankings
+        </button>
+        <button className={tab === "playoffs" ? "active" : ""} onClick={() => setTab("playoffs")}>
+          Playoffs
+        </button>
+        <button className={tab === "alliances" ? "active" : ""} onClick={() => setTab("alliances")}>
+          Alliances
         </button>
       </div>
 
@@ -114,8 +122,12 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
             </button>
           </div>
         </>
-      ) : (
+      ) : tab === "rankings" ? (
         <RankingsTable settings={settings} redTeams={redNumbers} blueTeams={blueNumbers} />
+      ) : tab === "playoffs" ? (
+        <PlayoffBracket matches={matches} />
+      ) : (
+        <AlliancesList settings={settings} />
       )}
     </div>
   );
