@@ -1,0 +1,15 @@
+# Dependencies (Bun workspace: one install at the repo root hoists everything)
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Compiled release binary (built by `bun run build:exe` / the release workflow)
+app.exe
+
+# Local env / editor cruft
+.DS_Store
+*.local
+.env
+.env.*
