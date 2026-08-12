@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Settings } from "../types";
 import { useMatches } from "../hooks/useMatches";
-import { compLevelLabel } from "../matchLabels";
+import { compLevelLabel, matchDisplayNumber } from "../matchLabels";
 import { RankingsTable } from "./RankingsTable";
 import { PlayoffBracket } from "./PlayoffBracket";
 import { AlliancesList } from "./AlliancesList";
@@ -83,7 +83,7 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
 
           <div className="match-browser-card">
             <div className="match-browser-label">
-              {compLevelLabel(match.compLevel)} #{match.matchNumber}
+              {compLevelLabel(match.compLevel)} #{matchDisplayNumber(match)}
               {match.played && match.winner && (
                 <span className={`badge ${match.winner === "red" ? "red" : "blue"}`} style={{ marginLeft: 8 }}>
                   {match.winner.toUpperCase()} WON

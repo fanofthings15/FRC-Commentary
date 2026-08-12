@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { MatchInfo } from "../types";
-import { compLevelLabel } from "../matchLabels";
+import { compLevelLabel, matchDisplayNumber } from "../matchLabels";
 import { SF_ADVANCEMENT, SF_ROUNDS, isDoubleElimFormat } from "../playoffBracket";
 
 function teamLabel(teams: { number: string; name: string }[]): string {
@@ -63,7 +63,7 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
   const [lines, setLines] = useState<LineSeg[]>([]);
   const [svgSize, setSvgSize] = useState({ width: 0, height: 0 });
 
-  const sfNumbers = sfMatches.map((m) => m.matchNumber);
+  const sfNumbers = sfMatches.map((m) => m.setNumber);
   const doubleElim = isDoubleElimFormat(sfNumbers);
 
   // Which match feeds into which — mirrors the standard bracket already
@@ -161,7 +161,7 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
               >
                 {isCurrent && <div className="bracket-here-tag">YOU ARE HERE</div>}
                 <div className="bracket-card-label">
-                  {compLevelLabel(m.compLevel)} #{m.matchNumber}
+                  {compLevelLabel(m.compLevel)} #{matchDisplayNumber(m)}
                   {m.played && m.winner && (
                     <span className={`badge ${m.winner === "red" ? "red" : "blue"}`} style={{ marginLeft: 6 }}>
                       {m.winner.toUpperCase()}
@@ -178,7 +178,7 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
     );
   }
 
-  const sfByNumber = new Map(sfMatches.map((m) => [m.matchNumber, m]));
+  const sfByNumber = new Map(sfMatches.map((m) => [m.setNumber, m]));
 
   // Merge all Finals games into a single result node, TBA-style, rather than
   // showing F1/F2/F3 as separate boxes — the team lineup doesn't change

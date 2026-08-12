@@ -1,16 +1,7 @@
 import React from "react";
 import { Settings } from "../types";
 import { useMatches } from "../hooks/useMatches";
-
-function compLevelLabel(level: string) {
-  switch (level) {
-    case "qm": return "Qual";
-    case "qf": return "Quarters";
-    case "sf": return "Semis";
-    case "f": return "Finals";
-    default: return level.toUpperCase();
-  }
-}
+import { compLevelLabel, matchDisplayNumber } from "../matchLabels";
 
 export function MatchSchedule({ settings }: { settings: Settings }) {
   const { matches, error, loading, reload } = useMatches(settings);
@@ -33,7 +24,7 @@ export function MatchSchedule({ settings }: { settings: Settings }) {
         {upcoming.slice(0, 25).map((m) => (
           <div key={m.key} className={`match-row ${m.key === firstUnplayedKey ? "next" : ""}`}>
             <div className="match-label">
-              {compLevelLabel(m.compLevel)}<br />#{m.matchNumber}
+              {compLevelLabel(m.compLevel)}<br />#{matchDisplayNumber(m)}
             </div>
             <div className="alliance red">
               {m.red.map((t) => (
