@@ -9,7 +9,7 @@ Panels:
 - **vMix Status** — read-only tally showing what's on program/preview and recording status. There are no cut/switch controls here on purpose — that stays in vMix itself with whoever's on the board.
 - **Alerts** — a "Producer" view to send preset or custom messages (e.g. "wrap up") to the Commentator View, where they appear as a banner without covering the chat/matches underneath.
 
-**No API keys or IPs are hard-coded anywhere in the code.** Everything (TBA API key, event key, vMix host/port, YouTube video ID) is entered in the in-app **Settings** menu and saved to your browser's local storage.
+**No API keys or IPs are hard-coded anywhere in the code.** Everything (TBA API key, event key, vMix host/port, YouTube video ID) is entered in the in-app **Settings** menu and saved encrypted on the backend (in `~/.frc-commentary`, outside the repo), shared across every device pointed at the same backend.
 
 ---
 
@@ -95,7 +95,7 @@ Click **Settings** (top right) and fill in:
 | vMix Port | Default vMix web controller port is `8088` |
 | Telestrator URL (optional) | Leave blank — it's auto-derived as `http://<vMix Host>:<vMix Port>/telestrator/`. Only set this if your telestrator lives somewhere non-standard. |
 
-Settings save per-browser. Each teammate opening the app on their own device will need to enter these once too — this is unaffected by the dev/prod/exe changes above.
+Settings are saved on the backend (encrypted at rest, outside the repo in `~/.frc-commentary`), so they're shared across every device pointed at the same backend. Fill them in once from any browser and every teammate's dashboard and commentator view picks them up. Each browser also keeps a local cache so fields don't flash empty for the split second before the backend responds.
 
 ## Using the Alerts panel
 
