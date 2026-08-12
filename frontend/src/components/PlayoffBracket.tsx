@@ -16,7 +16,10 @@ function teamLabel(
 }
 
 // Compact TBA-style node: a small header plus two stacked rows (red / blue),
-// each showing an alliance seed tag, teams, and a win/loss indicator once played.
+// each showing an alliance seed tag, teams, and a score once played.
+// By default the score is a binary win/loss ("1"/"0"), which is correct for
+// single-elimination SF matches. Finals is a best-of-3 series, so it passes
+// explicit redScoreText/blueScoreText (the running game count) instead.
 function BracketNode({
   refCb,
   title,
@@ -27,6 +30,8 @@ function BracketNode({
   played,
   isCurrent,
   advancement,
+  redScoreText,
+  blueScoreText,
 }: {
   refCb: (el: HTMLDivElement | null) => void;
   title: string;
@@ -37,6 +42,8 @@ function BracketNode({
   played: boolean;
   isCurrent?: boolean;
   advancement?: { winnerTo?: string; loserTo?: string };
+  redScoreText?: string;
+  blueScoreText?: string;
 }) {
   return (
     <div className={`bracket-node ${isCurrent ? "current" : ""}`} ref={refCb}>
@@ -47,14 +54,14 @@ function BracketNode({
           {red.allianceTag && <span className="bracket-alliance-tag">{red.allianceTag}</span>}
           <span className="bracket-node-teams">{red.teamsText}</span>
         </span>
-        {played && <span className="bracket-node-score">{redWon ? "1" : "0"}</span>}
+        {played && <span className="bracket-node-score">{redScoreText ?? (redWon ? "1" : "0")}</span>}
       </div>
       <div className={`bracket-node-row blue ${played && blueWon ? "won" : ""}`}>
         <span className="bracket-node-left">
           {blue.allianceTag && <span className="bracket-alliance-tag">{blue.allianceTag}</span>}
           <span className="bracket-node-teams">{blue.teamsText}</span>
         </span>
-        {played && <span className="bracket-node-score">{blueWon ? "1" : "0"}</span>}
+        {played && <span className="bracket-node-score">{blueScoreText ?? (blueWon ? "1" : "0")}</span>}
       </div>
       {advancement && (advancement.winnerTo || advancement.loserTo) && (
         <div className="bracket-node-advancement">
@@ -285,9 +292,11 @@ export function PlayoffBracket({
                 title={isChampionshipDecided ? "Event Champion" : "Finals"}
                 red={finalsTeams ? teamLabel(finalsTeams.red, allianceByTeam) : { allianceTag: null, teamsText: "TBD" }}
                 blue={finalsTeams ? teamLabel(finalsTeams.blue, allianceByTeam) : { allianceTag: null, teamsText: "TBD" }}
-                redWon={isChampionshipDecided && redFinalsWins > blueFinalsWins}
-                blueWon={isChampionshipDecided && blueFinalsWins > redFinalsWins}
+                redWon={redFinalsWins > blueFinalsWins}
+                blueWon={blueFinalsWins > redFinalsWins}
                 played={finalsPlayed}
+                redScoreText={finalsPlayed ? String(redFinalsWins) : undefined}
+                blueScoreText={finalsPlayed ? String(blueFinalsWins) : undefined}
                 isCurrent={isCurrentFinals}
                 refCb={(el) => {
                   cardRefs.current["final"] = el;
