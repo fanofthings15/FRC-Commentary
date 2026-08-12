@@ -935,22 +935,29 @@ a {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Clickable team numbers */
+/* Clickable team numbers - styled as a small chip so the click target is
+   bigger and more obviously interactive than bare text would be */
 .team-link {
-  background: transparent;
-  border: 0;
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(226, 161, 58, 0.08);
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 2px 7px;
   font: inherit;
   font-weight: inherit;
   color: inherit;
   cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  transition: text-decoration-color 0.15s;
+  transition: background 0.12s, border-color 0.12s;
 }
 
 .team-link:hover {
-  text-decoration-color: currentColor;
+  background: rgba(226, 161, 58, 0.2);
+  border-color: var(--accent);
+}
+
+.team-link:active {
+  background: rgba(226, 161, 58, 0.3);
 }
 
 /* Team info popup */
