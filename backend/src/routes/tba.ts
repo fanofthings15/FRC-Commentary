@@ -1,17 +1,28 @@
 import { Router, Request, Response } from "express";
+import type {
+  MatchSimple,
+  TeamSimple,
+  EventRankings,
+  EliminationAlliance,
+} from "../types/tba.js";
+import { queryString, errorMessage } from "../util.js";
 
 const router = Router();
 const TBA_BASE = "https://www.thebluealliance.com/api/v3";
 
-function hometownFor(t: any): string {
+function hometownFor(t: TeamSimple): string {
   const parts = [t.city, t.state_prov || t.country].filter(Boolean);
   return parts.join(", ");
 }
 
+function tbaHeaders(apiKey: string): HeadersInit {
+  return { "X-TBA-Auth-Key": apiKey };
+}
+
 // GET /api/tba/matches?eventKey=2026miket&apiKey=...
 router.get("/matches", async (req: Request, res: Response) => {
-  const eventKey = req.query.eventKey as string | undefined;
-  const apiKey = req.query.apiKey as string | undefined;
+  const eventKey = queryString(req, "eventKey");
+  const apiKey = queryString(req, "apiKey");
 
   if (!eventKey || !apiKey) {
     return res.status(400).json({ error: "Missing 'eventKey' or 'apiKey' (set both in Settings)" });
@@ -19,30 +30,27 @@ router.get("/matches", async (req: Request, res: Response) => {
 
   try {
     const [matchesResp, teamsResp] = await Promise.all([
-      fetch(`${TBA_BASE}/event/${eventKey}/matches/simple`, {
-        headers: { "X-TBA-Auth-Key": apiKey },
-      }),
-      fetch(`${TBA_BASE}/event/${eventKey}/teams/simple`, {
-        headers: { "X-TBA-Auth-Key": apiKey },
-      }),
+      fetch(`${TBA_BASE}/event/${eventKey}/matches/simple`, { headers: tbaHeaders(apiKey) }),
+      fetch(`${TBA_BASE}/event/${eventKey}/teams/simple`, { headers: tbaHeaders(apiKey) }),
     ]);
 
     if (!matchesResp.ok) {
       return res.status(matchesResp.status).json({ error: "TBA rejected the request. Check your API key and event key." });
     }
 
-    const matches = await matchesResp.json();
-    const teams = teamsResp.ok ? await teamsResp.json() : [];
+    const matches = (await matchesResp.json()) as MatchSimple[];
+    const teams = teamsResp.ok ? ((await teamsResp.json()) as TeamSimple[]) : [];
 
     const teamInfoByKey: Record<string, { name: string; hometown: string }> = {};
-    for (const t of teams as any[]) {
+    for (const t of teams) {
       teamInfoByKey[t.key] = {
         name: t.nickname || t.name || t.key,
         hometown: hometownFor(t),
       };
     }
 
-    const cleaned = (matches as any[])
+    const cleaned = matches
+      .slice()
       .sort((a, b) => (a.time || a.predicted_time || 0) - (b.time || b.predicted_time || 0))
       .map((m) => ({
         key: m.key,
@@ -50,12 +58,12 @@ router.get("/matches", async (req: Request, res: Response) => {
         compLevel: m.comp_level,
         setNumber: m.set_number,
         scheduledTime: m.time ? m.time * 1000 : m.predicted_time ? m.predicted_time * 1000 : null,
-        red: (m.alliances?.red?.team_keys || []).map((tk: string) => ({
+        red: (m.alliances?.red?.team_keys || []).map((tk) => ({
           number: tk.replace("frc", ""),
           name: teamInfoByKey[tk]?.name || "",
           hometown: teamInfoByKey[tk]?.hometown || "",
         })),
-        blue: (m.alliances?.blue?.team_keys || []).map((tk: string) => ({
+        blue: (m.alliances?.blue?.team_keys || []).map((tk) => ({
           number: tk.replace("frc", ""),
           name: teamInfoByKey[tk]?.name || "",
           hometown: teamInfoByKey[tk]?.hometown || "",
@@ -65,29 +73,27 @@ router.get("/matches", async (req: Request, res: Response) => {
       }));
 
     res.json({ matches: cleaned });
-  } catch (err: any) {
-    res.status(502).json({ error: `Could not reach The Blue Alliance. (${err.message})` });
+  } catch (err) {
+    res.status(502).json({ error: `Could not reach The Blue Alliance. (${errorMessage(err)})` });
   }
 });
 
 // GET /api/tba/rankings?eventKey=2026miket&apiKey=...
 router.get("/rankings", async (req: Request, res: Response) => {
-  const eventKey = req.query.eventKey as string | undefined;
-  const apiKey = req.query.apiKey as string | undefined;
+  const eventKey = queryString(req, "eventKey");
+  const apiKey = queryString(req, "apiKey");
 
   if (!eventKey || !apiKey) {
     return res.status(400).json({ error: "Missing 'eventKey' or 'apiKey' (set both in Settings)" });
   }
 
   try {
-    const r = await fetch(`${TBA_BASE}/event/${eventKey}/rankings`, {
-      headers: { "X-TBA-Auth-Key": apiKey },
-    });
+    const r = await fetch(`${TBA_BASE}/event/${eventKey}/rankings`, { headers: tbaHeaders(apiKey) });
     if (!r.ok) {
       return res.status(r.status).json({ error: "TBA rejected the request. Check your API key and event key." });
     }
-    const data = await r.json();
-    const rankings = ((data as any)?.rankings || []).map((rk: any) => ({
+    const data = (await r.json()) as EventRankings | null;
+    const rankings = (data?.rankings || []).map((rk) => ({
       rank: rk.rank,
       teamNumber: String(rk.team_key || "").replace("frc", ""),
       wins: rk.record?.wins ?? null,
@@ -96,15 +102,15 @@ router.get("/rankings", async (req: Request, res: Response) => {
       played: rk.matches_played ?? null,
     }));
     res.json({ rankings });
-  } catch (err: any) {
-    res.status(502).json({ error: `Could not reach The Blue Alliance. (${err.message})` });
+  } catch (err) {
+    res.status(502).json({ error: `Could not reach The Blue Alliance. (${errorMessage(err)})` });
   }
 });
 
 // GET /api/tba/alliances?eventKey=2026miket&apiKey=...
 router.get("/alliances", async (req: Request, res: Response) => {
-  const eventKey = req.query.eventKey as string | undefined;
-  const apiKey = req.query.apiKey as string | undefined;
+  const eventKey = queryString(req, "eventKey");
+  const apiKey = queryString(req, "apiKey");
 
   if (!eventKey || !apiKey) {
     return res.status(400).json({ error: "Missing 'eventKey' or 'apiKey' (set both in Settings)" });
@@ -112,38 +118,34 @@ router.get("/alliances", async (req: Request, res: Response) => {
 
   try {
     const [allianceResp, teamsResp] = await Promise.all([
-      fetch(`${TBA_BASE}/event/${eventKey}/alliances`, {
-        headers: { "X-TBA-Auth-Key": apiKey },
-      }),
-      fetch(`${TBA_BASE}/event/${eventKey}/teams/simple`, {
-        headers: { "X-TBA-Auth-Key": apiKey },
-      }),
+      fetch(`${TBA_BASE}/event/${eventKey}/alliances`, { headers: tbaHeaders(apiKey) }),
+      fetch(`${TBA_BASE}/event/${eventKey}/teams/simple`, { headers: tbaHeaders(apiKey) }),
     ]);
 
     if (!allianceResp.ok) {
       return res.status(allianceResp.status).json({ error: "TBA rejected the request. Check your API key and event key." });
     }
 
-    const alliances = await allianceResp.json();
-    const teams = teamsResp.ok ? await teamsResp.json() : [];
+    const alliances = ((await allianceResp.json()) as EliminationAlliance[]) || [];
+    const teams = teamsResp.ok ? ((await teamsResp.json()) as TeamSimple[]) : [];
 
     const nameByKey: Record<string, string> = {};
-    for (const t of teams as any[]) {
+    for (const t of teams) {
       nameByKey[t.key] = t.nickname || t.name || t.key;
     }
 
-    const cleaned = ((alliances as any[]) || []).map((a, idx) => ({
+    const cleaned = alliances.map((a, idx) => ({
       number: idx + 1,
       name: a.name || `Alliance ${idx + 1}`,
-      teams: (a.picks || []).map((tk: string) => ({
+      teams: (a.picks || []).map((tk) => ({
         number: tk.replace("frc", ""),
         name: nameByKey[tk] || "",
       })),
     }));
 
     res.json({ alliances: cleaned });
-  } catch (err: any) {
-    res.status(502).json({ error: `Could not reach The Blue Alliance. (${err.message})` });
+  } catch (err) {
+    res.status(502).json({ error: `Could not reach The Blue Alliance. (${errorMessage(err)})` });
   }
 });
 
