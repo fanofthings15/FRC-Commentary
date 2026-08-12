@@ -1192,6 +1192,14 @@ a {
   color: var(--accent);
 }
 
+.h2h-red {
+  color: #ff8577;
+}
+
+.h2h-blue {
+  color: #7fb8ff;
+}
+
 /* On-deck ticker */
 .on-deck-ticker {
   display: flex;

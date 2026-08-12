@@ -44,7 +44,9 @@ function findHeadToHead(matches: MatchInfo[], current: MatchInfo): Grouped[] {
     }
   }
 
-  return Array.from(grouped.values());
+  return Array.from(grouped.values()).sort(
+    (a, b) => Number(a.team1) - Number(b.team1) || Number(a.team2) - Number(b.team2)
+  );
 }
 
 export function HeadToHead({ matches, currentMatch }: { matches: MatchInfo[]; currentMatch: MatchInfo }) {
@@ -57,9 +59,9 @@ export function HeadToHead({ matches, currentMatch }: { matches: MatchInfo[]; cu
       <div className="head-to-head-title">Pre Comp Head to Head</div>
       {encounters.map((e, i) => (
         <div key={i} className="head-to-head-row">
-          <ClickableTeam number={e.team1} />
+          <ClickableTeam number={e.team1} className="h2h-red" />
           <span className="head-to-head-score">{e.team1Wins}-{e.team2Wins}</span>
-          <ClickableTeam number={e.team2} />
+          <ClickableTeam number={e.team2} className="h2h-blue" />
         </div>
       ))}
     </div>
