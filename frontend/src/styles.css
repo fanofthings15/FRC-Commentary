@@ -449,7 +449,9 @@ a {
 .team-meta-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  row-gap: 2px;
+  column-gap: 8px;
 }
 
 .rank-tag {
@@ -542,6 +544,22 @@ a {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: #0f1319;
+}
+
+.rankings-sort-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.rankings-sort-btn:hover {
+  color: var(--text);
 }
 
 .rankings-rank {

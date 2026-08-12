@@ -104,6 +104,18 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
             <button className="btn" onClick={reload}>Refresh</button>
           </div>
 
+          <div className="match-browser-nav">
+            <button className="btn" disabled={i === 0} onClick={() => setIndex(Math.max(0, i - 1))}>
+              ← Previous Match
+            </button>
+            <button className="btn" onClick={() => setIndex(defaultIndex)} disabled={isCurrent}>
+              Jump to Current
+            </button>
+            <button className="btn" disabled={i === matches.length - 1} onClick={() => setIndex(Math.min(matches.length - 1, i + 1))}>
+              Next Match →
+            </button>
+          </div>
+
           <div className="match-browser-card">
             <div className="match-browser-label">
               {compLevelLabel(match.compLevel)} #{matchDisplayNumber(match)}
@@ -150,18 +162,6 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
           </div>
 
           <HeadToHead matches={matches} currentMatch={match} />
-
-          <div className="match-browser-nav">
-            <button className="btn" disabled={i === 0} onClick={() => setIndex(Math.max(0, i - 1))}>
-              ← Previous Match
-            </button>
-            <button className="btn" onClick={() => setIndex(defaultIndex)} disabled={isCurrent}>
-              Jump to Current
-            </button>
-            <button className="btn" disabled={i === matches.length - 1} onClick={() => setIndex(Math.min(matches.length - 1, i + 1))}>
-              Next Match →
-            </button>
-          </div>
         </>
       ) : tab === "rankings" ? (
         <RankingsTable settings={settings} redTeams={redNumbers} blueTeams={blueNumbers} />

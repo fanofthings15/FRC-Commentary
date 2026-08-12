@@ -1,9 +1,12 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Settings } from "../types";
 import { useRankings } from "../hooks/useRankings";
 import { useOprs } from "../hooks/useOprs";
 import { ClickableTeam } from "./ClickableTeam";
 import { StaleBanner } from "./StaleBanner";
+
+type SortKey = "rank" | "team" | "opr";
+type SortDir = "asc" | "desc";
 
 export function RankingsTable({
   settings,
@@ -16,12 +19,43 @@ export function RankingsTable({
 }) {
   const { rankings, error, loading, lastUpdated, isStale, reload } = useRankings(settings);
   const { oprs } = useOprs(settings);
+  const [sortKey, setSortKey] = useState<SortKey>("rank");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const oprByTeam = useMemo(() => {
     const map = new Map<string, number>();
     for (const o of oprs) if (o.opr !== null) map.set(o.teamNumber, o.opr);
     return map;
   }, [oprs]);
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  const sorted = useMemo(() => {
+    const arr = [...rankings];
+    arr.sort((a, b) => {
+      let av: number;
+      let bv: number;
+      if (sortKey === "rank") {
+        av = a.rank;
+        bv = b.rank;
+      } else if (sortKey === "team") {
+        av = Number(a.teamNumber);
+        bv = Number(b.teamNumber);
+      } else {
+        av = oprByTeam.get(a.teamNumber) ?? -Infinity;
+        bv = oprByTeam.get(b.teamNumber) ?? -Infinity;
+      }
+      return sortDir === "asc" ? av - bv : bv - av;
+    });
+    return arr;
+  }, [rankings, sortKey, sortDir, oprByTeam]);
 
   if (!settings.tbaApiKey || !settings.tbaEventKey) {
     return <div className="empty-state">Add your TBA API key and event key in Settings to load rankings.</div>;
@@ -39,6 +73,8 @@ export function RankingsTable({
     return <div className="empty-state">No rankings published yet for this event.</div>;
   }
 
+  const arrow = (key: SortKey) => (sortKey === key ? (sortDir === "asc" ? " ▲" : " ▼") : "");
+
   return (
     <div>
       {isStale && <StaleBanner lastUpdated={lastUpdated} />}
@@ -50,12 +86,12 @@ export function RankingsTable({
 
       <div className="rankings-table">
         <div className="rankings-row rankings-head">
-          <span>Rank</span>
-          <span>Team</span>
-          <span>OPR</span>
+          <button className="rankings-sort-btn" onClick={() => toggleSort("rank")}>Rank{arrow("rank")}</button>
+          <button className="rankings-sort-btn" onClick={() => toggleSort("team")}>Team{arrow("team")}</button>
+          <button className="rankings-sort-btn" onClick={() => toggleSort("opr")}>OPR{arrow("opr")}</button>
           <span>W-L-T</span>
         </div>
-        {rankings.map((r) => {
+        {sorted.map((r) => {
           const isRed = redTeams.includes(r.teamNumber);
           const isBlue = blueTeams.includes(r.teamNumber);
           const cls = isRed ? "red" : isBlue ? "blue" : "";
