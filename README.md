@@ -4,51 +4,83 @@ A single-screen dashboard for FIRST Robotics Competition live commentary teams.
 
 Panels:
 - **YouTube Live Chat** — embed of the stream's live chat
-- **Match Schedule / Match Browser** — upcoming and past matches with team numbers/names, pulled from The Blue Alliance. The Commentator View's browser lets you step back through completed matches or peek ahead with Previous/Next.
-- **Telestrator** — embedded directly in the Commentator View, so commentators can draw on it without a separate tab. vMix serves this from the same address as its API (default `http://<vmix host>:8088/telestrator/`); no separate setup needed beyond your vMix host in Settings.
+- **Match Schedule / Match Browser** — upcoming and past matches with team numbers, names, hometowns, and current rank, pulled from The Blue Alliance. Includes tabs for Rankings, the Playoff Bracket (with connected advancement lines), and the 8 playoff Alliances.
+- **Telestrator launcher** — vMix's telestrator opens in its own properly-sized window (it doesn't embed well inside another page), auto-derived from your vMix host in Settings.
 - **vMix Status** — read-only tally showing what's on program/preview and recording status. There are no cut/switch controls here on purpose — that stays in vMix itself with whoever's on the board.
-- **Alerts** — a "Producer" view to send preset or custom messages (e.g. "wrap up") to the Commentator View, where they appear as a banner without covering the chat/telestrator/matches underneath.
+- **Alerts** — a "Producer" view to send preset or custom messages (e.g. "wrap up") to the Commentator View, where they appear as a banner without covering the chat/matches underneath.
 
-**No API keys or IPs are hard-coded anywhere in the code.** Everything (TBA API key, event key, vMix host/port, YouTube video ID) is entered in the in-app **Settings** menu and saved to your browser's local storage. You can change any of it at any time without redeploying.
+**No API keys or IPs are hard-coded anywhere in the code.** Everything (TBA API key, event key, vMix host/port, YouTube video ID) is entered in the in-app **Settings** menu and saved to your browser's local storage.
 
 ---
 
 ## Requirements
 
-- [Bun](https://bun.sh) installed on the laptop/PC you'll run this from at the event (`curl -fsSL https://bun.sh/install | bash` on Mac/Linux, or see bun.sh/docs/installation for Windows)
+- [Bun](https://bun.sh) installed on the laptop/PC you'll run this from at the event
 - That machine must be on the same local network as the vMix PC
 
 ## Project layout
 
 ```
 frc-commentary/
-  backend/    Node + Express + TypeScript API (proxies vMix + The Blue Alliance, hosts the alerts WebSocket)
-  frontend/   React + TypeScript (Vite) dashboard UI
+  backend/     Express + TypeScript API (proxies vMix + The Blue Alliance, hosts the alerts WebSocket, serves the built frontend)
+  frontend/    React + TypeScript (Vite) dashboard UI
+  scripts/     dev.ts (runs both dev servers together) and zip-ui.ts (packages the built UI for the .exe)
 ```
 
-The backend exists mainly because:
-1. Browsers block cross-origin requests to vMix's local API by default (CORS) — the backend proxies around this.
-2. It keeps a single WebSocket hub so "Producer" and "Commentator" views (which might be two different browser tabs/laptops) can talk to each other.
+## Dev vs. prod — how this actually works
 
-## Running it locally
+This trips people up at first, so here's the short version:
 
-Open two terminals.
+**In development**, you're running *two* processes: the Vite dev server (instant hot-reload when you edit frontend code) and the backend (Express, also hot-reloading via `bun --watch`). The browser only ever talks to Vite's port (`5173`) — Vite quietly forwards anything under `/api` or `/ws` to the backend on port `3010` behind the scenes. That's what the `proxy` block in `vite.config.ts` does. `bun run dev` at the repo root starts both for you automatically.
 
-**Backend:**
+**In production**, there's only *one* process. `vite build` compiles the whole frontend down to a handful of static HTML/CSS/JS files (`frontend/dist`). The backend then just serves those files directly *and* handles the API/WebSocket, all on the same port (`3010`). One origin, no proxy, no CORS — because the browser is talking to exactly one server for everything.
+
+**For distribution**, `bun build --compile` takes that same backend and bakes the entire built frontend into it, producing a single `app.exe`. Nothing to install, nothing to configure, nothing to run in a terminal — whoever's using it just double-clicks the file.
+
+Because the backend always runs on a fixed port (`3010`, never random), and the frontend now always talks to whatever origin it's being served from (no more separately-configured "Backend URL" setting), the same code works unmodified in all three of these situations.
+
+## Running it locally (dev)
+
+From the repo root:
+
 ```bash
-cd backend
 bun install
 bun run dev
 ```
-Runs on http://localhost:48213
 
-**Frontend:**
+This starts both the backend (`:3010`) and the Vite dev server (`:5173`). Open **http://localhost:5173** — that's the one you actually use during development.
+
+## Running a production-style build locally
+
+Useful for testing the "one process" setup before compiling it to an exe:
+
 ```bash
-cd frontend
-bun install
-bun run dev
+bun run build:ui        # builds frontend/dist
+cd backend && bun run start
 ```
-Runs on http://localhost:5173 — open this in your browser.
+
+Then open **http://localhost:3010** directly — no Vite, no separate frontend process, just the backend serving everything.
+
+## Building the distributable .exe
+
+```bash
+bun run build:exe
+```
+
+This runs `build:ui`, zips the result into `backend/ui-dist.zip` (via `scripts/zip-ui.ts` — a plain JS zip implementation, not the `zip` command, so this works identically on Windows), then compiles the backend with that zip embedded into a single Windows executable: `app.exe`. Double-click it, no Bun install required on the machine running it.
+
+> **Note on `backend/ui-dist.zip`:** an empty placeholder version of this file is committed to the repo. That's intentional — the backend statically imports it (required for Bun to know what to embed into the `.exe`), so without *some* file there, even `bun run dev` would fail to start before you'd ever built the UI once. `build:exe` overwrites it with the real bundle each time you run it.
+
+## Releasing a new version
+
+Push a version tag:
+
+```bash
+git tag v1.1.0
+git push origin v1.1.0
+```
+
+`.github/workflows/release.yml` picks this up, builds `app.exe` on GitHub's servers, renames it to `app-1.1.0.exe`, and publishes it as a GitHub release — automatically, no local Windows machine or Bun install needed to produce it. Anyone on the team can then just download the latest release and double-click it.
 
 ## First-time setup (in the app)
 
@@ -63,19 +95,19 @@ Click **Settings** (top right) and fill in:
 | vMix Port | Default vMix web controller port is `8088` |
 | Telestrator URL (optional) | Leave blank — it's auto-derived as `http://<vMix Host>:<vMix Port>/telestrator/`. Only set this if your telestrator lives somewhere non-standard. |
 
-Settings save automatically and persist between sessions (per browser). Each teammate opening the app on their own laptop will need to enter these once too.
+Settings save per-browser. Each teammate opening the app on their own device will need to enter these once too — this is unaffected by the dev/prod/exe changes above.
 
 ## Using the Alerts panel
 
-- **Commentator view** (`/commentator`): fullscreen, shows incoming alerts as a large banner. Put this on the commentator's screen.
-- **Producer view** (`/producer`, or the main dashboard's Alerts panel): buttons for preset messages (Wrap Up, Go to Break, Match Starting, Stand By, All Clear) plus a text box to send anything custom.
+- **Commentator view** (`#/commentator`): shows chat, matches, and a telestrator launcher, with incoming alerts appearing as a banner. Put this on the commentator's screen.
+- **Main dashboard**: the Alerts panel here has buttons for preset messages (Wrap Up, Go to Break, Match Starting, Stand By, All Clear) plus a text box for anything custom.
 
-Both connect to the backend's WebSocket, so they work across two different machines on the same network — just point both at the same backend (set the backend URL in Settings if not running on the same machine as the frontend).
+Both connect to the same alerts WebSocket automatically — no configuration needed, since it's always the same origin the page was loaded from.
 
 ## Notes on vMix
 
-The backend calls vMix's built-in HTTP API (`http://<host>:<port>/api`), which is enabled by default in vMix. No plugin needed. Because telestrator/replay run as vMix inputs/overlays in your setup, they're controlled the same way as any other input — cut to them or toggle their overlay from the vMix panel like any other source. If you later add a title for "Telestrator" or "Replay" as a named input, it'll show up automatically in the input list.
+The backend calls vMix's built-in HTTP API (`http://<host>:<port>/api`), enabled by default in vMix. No plugin needed.
 
 ## Deploying for an event day
 
-Simplest approach: run both `backend` and `frontend` (or a built version of the frontend) on one laptop connected to the venue Wi-Fi/LAN that the vMix machine is also on, then have commentators open the dashboard URL from their own devices on that same network.
+Run `app.exe` on one laptop connected to the venue Wi-Fi/LAN that the vMix machine is also on, then have commentators open `http://<that laptop's IP>:3010` from their own devices on the same network.

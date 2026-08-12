@@ -6,7 +6,7 @@ import { YouTubeChat } from "./YouTubeChat";
 import { MatchBrowser } from "./MatchBrowser";
 
 export function CommentatorView({ settings }: { settings: Settings }) {
-  const { connected, lastAlert } = useAlertsSocket(settings.backendUrl);
+  const { connected, lastAlert } = useAlertsSocket();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {

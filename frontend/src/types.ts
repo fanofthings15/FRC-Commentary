@@ -4,7 +4,6 @@ export interface Settings {
   tbaEventKey: string;
   vmixHost: string;
   vmixPort: string;
-  backendUrl: string;
   telestratorUrl: string; // optional override; auto-derived from vmixHost/vmixPort when empty
 }
 
@@ -14,7 +13,6 @@ export const DEFAULT_SETTINGS: Settings = {
   tbaEventKey: "",
   vmixHost: "",
   vmixPort: "8088",
-  backendUrl: "http://localhost:48213",
   telestratorUrl: "",
 };
 

@@ -9,12 +9,10 @@ export function VmixStatus({ settings }: { settings: Settings }) {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!settings.vmixHost || !settings.backendUrl) return;
+    if (!settings.vmixHost) return;
     try {
-      const url = new URL(`${settings.backendUrl}/api/vmix/status`);
-      url.searchParams.set("host", settings.vmixHost);
-      url.searchParams.set("port", settings.vmixPort || "8088");
-      const res = await fetch(url.toString());
+      const params = new URLSearchParams({ host: settings.vmixHost, port: settings.vmixPort || "8088" });
+      const res = await fetch(`/api/vmix/status?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to reach vMix");
       setStatus(data);
@@ -22,7 +20,7 @@ export function VmixStatus({ settings }: { settings: Settings }) {
     } catch (err: any) {
       setError(err.message);
     }
-  }, [settings.vmixHost, settings.vmixPort, settings.backendUrl]);
+  }, [settings.vmixHost, settings.vmixPort]);
 
   useEffect(() => {
     load();

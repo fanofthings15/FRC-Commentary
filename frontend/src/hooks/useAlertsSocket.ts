@@ -1,22 +1,17 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { AlertMessage } from "../types";
 
-export function useAlertsSocket(backendUrl: string) {
+// Connects to the alerts WebSocket on the app's own origin — same host in
+// prod (the backend serves both the UI and this socket), proxied through
+// Vite in dev (see vite.config.ts's /ws proxy entry).
+export function useAlertsSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
   const [lastAlert, setLastAlert] = useState<AlertMessage | null>(null);
 
   useEffect(() => {
-    if (!backendUrl) return;
-
-    let wsUrl: string;
-    try {
-      const u = new URL(backendUrl);
-      const proto = u.protocol === "https:" ? "wss:" : "ws:";
-      wsUrl = `${proto}//${u.host}/ws/alerts`;
-    } catch {
-      return;
-    }
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${proto}//${window.location.host}/ws/alerts`;
 
     let cancelled = false;
     let socket: WebSocket;
@@ -47,7 +42,7 @@ export function useAlertsSocket(backendUrl: string) {
       cancelled = true;
       wsRef.current?.close();
     };
-  }, [backendUrl]);
+  }, []);
 
   const sendAlert = useCallback((text: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

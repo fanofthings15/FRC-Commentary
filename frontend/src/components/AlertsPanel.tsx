@@ -5,7 +5,7 @@ import { useAlertsSocket } from "../hooks/useAlertsSocket";
 const PRESETS = ["Wrap Up", "Go to Break", "Match Starting", "Stand By", "All Clear"];
 
 export function AlertsPanel({ settings }: { settings: Settings }) {
-  const { connected, sendAlert, lastAlert } = useAlertsSocket(settings.backendUrl);
+  const { connected, sendAlert, lastAlert } = useAlertsSocket();
   const [custom, setCustom] = useState("");
 
   const send = (text: string) => {

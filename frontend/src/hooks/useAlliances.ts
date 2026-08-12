@@ -7,14 +7,12 @@ export function useAlliances(settings: Settings) {
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
-    if (!settings.tbaApiKey || !settings.tbaEventKey || !settings.backendUrl) return;
+    if (!settings.tbaApiKey || !settings.tbaEventKey) return;
     setLoading(true);
     setError(null);
     try {
-      const url = new URL(`${settings.backendUrl}/api/tba/alliances`);
-      url.searchParams.set("apiKey", settings.tbaApiKey);
-      url.searchParams.set("eventKey", settings.tbaEventKey);
-      const res = await fetch(url.toString());
+      const params = new URLSearchParams({ apiKey: settings.tbaApiKey, eventKey: settings.tbaEventKey });
+      const res = await fetch(`/api/tba/alliances?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load alliances");
       setAlliances(data.alliances);
@@ -23,7 +21,7 @@ export function useAlliances(settings: Settings) {
     } finally {
       setLoading(false);
     }
-  }, [settings.tbaApiKey, settings.tbaEventKey, settings.backendUrl]);
+  }, [settings.tbaApiKey, settings.tbaEventKey]);
 
   useEffect(() => {
     load();
