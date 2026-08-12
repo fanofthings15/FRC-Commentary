@@ -537,7 +537,7 @@ a {
 
 .rankings-opr {
   color: var(--text-dim);
-  text-align: right;
+  text-align: left;
   white-space: nowrap;
 }
 
@@ -565,6 +565,11 @@ a {
   letter-spacing: inherit;
   cursor: pointer;
   text-align: left;
+  width: 100%;
+}
+
+.rankings-sort-btn-right {
+  text-align: right;
 }
 
 .rankings-sort-btn:hover {
