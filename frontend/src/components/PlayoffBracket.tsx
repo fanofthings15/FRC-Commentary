@@ -22,11 +22,8 @@ function TeamListInline({ teams }: { teams: { number: string; name: string }[] }
   }
   return (
     <>
-      {teams.map((t, i) => (
-        <React.Fragment key={t.number}>
-          {i > 0 && ", "}
-          <ClickableTeam number={t.number} />
-        </React.Fragment>
+      {teams.map((t) => (
+        <ClickableTeam key={t.number} number={t.number} />
       ))}
     </>
   );
