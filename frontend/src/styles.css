@@ -588,7 +588,7 @@ a {
 .bracket-rounds {
   position: relative;
   display: flex;
-  gap: 34px;
+  gap: 56px;
 }
 
 .bracket-round {
@@ -738,6 +738,25 @@ a {
   white-space: nowrap;
 }
 
+.bracket-node-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.bracket-alliance-tag {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 9.5px;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  border-radius: 3px;
+  padding: 0px 3px;
+  flex-shrink: 0;
+}
+
 .bracket-node-score {
   font-family: var(--font-mono);
   font-weight: 700;
@@ -745,6 +764,15 @@ a {
   color: var(--text);
   margin-left: 6px;
   flex-shrink: 0;
+}
+
+.bracket-node-advancement {
+  padding: 4px 8px 6px;
+  border-top: 1px dashed var(--panel-border);
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  line-height: 1.5;
 }
 
 .bracket-round-final {

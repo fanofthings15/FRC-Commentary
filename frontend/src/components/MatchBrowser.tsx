@@ -6,12 +6,14 @@ import { RankingsTable } from "./RankingsTable";
 import { PlayoffBracket } from "./PlayoffBracket";
 import { AlliancesList } from "./AlliancesList";
 import { useRankings } from "../hooks/useRankings";
+import { useAlliances } from "../hooks/useAlliances";
 
 type Tab = "match" | "rankings" | "playoffs" | "alliances";
 
 export function MatchBrowser({ settings }: { settings: Settings }) {
   const { matches, error, loading, reload } = useMatches(settings);
   const { rankings } = useRankings(settings);
+  const { alliances } = useAlliances(settings);
   const [index, setIndex] = useState<number | null>(null);
   const [tab, setTab] = useState<Tab>("match");
 
@@ -20,6 +22,14 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
     for (const r of rankings) map.set(r.teamNumber, r.rank);
     return map;
   }, [rankings]);
+
+  const allianceByTeam = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const a of alliances) {
+      for (const t of a.teams) map.set(t.number, a.number);
+    }
+    return map;
+  }, [alliances]);
 
   // Default cursor: the first unplayed match, or the last match if everything's played.
   const defaultIndex = useMemo(() => {
@@ -139,7 +149,7 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
       ) : tab === "rankings" ? (
         <RankingsTable settings={settings} redTeams={redNumbers} blueTeams={blueNumbers} />
       ) : tab === "playoffs" ? (
-        <PlayoffBracket matches={matches} currentMatchKey={match.key} />
+        <PlayoffBracket matches={matches} currentMatchKey={match.key} allianceByTeam={allianceByTeam} />
       ) : (
         <AlliancesList settings={settings} />
       )}

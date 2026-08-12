@@ -3,43 +3,65 @@ import { MatchInfo } from "../types";
 import { compLevelLabel, matchDisplayNumber } from "../matchLabels";
 import { SF_ADVANCEMENT, SF_ROUNDS, isDoubleElimFormat } from "../playoffBracket";
 
-function teamLabel(teams: { number: string; name: string }[]): string {
-  return teams.length > 0 ? teams.map((t) => t.number).join(", ") : "TBD";
+function teamLabel(
+  teams: { number: string; name: string }[],
+  allianceByTeam: Map<string, number>
+): { allianceTag: string | null; teamsText: string } {
+  if (teams.length === 0) return { allianceTag: null, teamsText: "TBD" };
+  const allianceNum = allianceByTeam.get(teams[0].number);
+  return {
+    allianceTag: allianceNum ? `A${allianceNum}` : null,
+    teamsText: teams.map((t) => t.number).join(", "),
+  };
 }
 
 // Compact TBA-style node: a small header plus two stacked rows (red / blue),
-// each showing the teams and a win/loss indicator once the match is played.
+// each showing an alliance seed tag, teams, and a win/loss indicator once played.
 function BracketNode({
   refCb,
   title,
-  redTeams,
-  blueTeams,
+  red,
+  blue,
   redWon,
   blueWon,
   played,
   isCurrent,
+  advancement,
 }: {
   refCb: (el: HTMLDivElement | null) => void;
   title: string;
-  redTeams: string;
-  blueTeams: string;
+  red: { allianceTag: string | null; teamsText: string };
+  blue: { allianceTag: string | null; teamsText: string };
   redWon: boolean;
   blueWon: boolean;
   played: boolean;
   isCurrent?: boolean;
+  advancement?: { winnerTo?: string; loserTo?: string };
 }) {
   return (
     <div className={`bracket-node ${isCurrent ? "current" : ""}`} ref={refCb}>
       {isCurrent && <div className="bracket-here-tag">YOU ARE HERE</div>}
       <div className="bracket-node-title">{title}</div>
       <div className={`bracket-node-row red ${played && redWon ? "won" : ""}`}>
-        <span className="bracket-node-teams">{redTeams}</span>
+        <span className="bracket-node-left">
+          {red.allianceTag && <span className="bracket-alliance-tag">{red.allianceTag}</span>}
+          <span className="bracket-node-teams">{red.teamsText}</span>
+        </span>
         {played && <span className="bracket-node-score">{redWon ? "1" : "0"}</span>}
       </div>
       <div className={`bracket-node-row blue ${played && blueWon ? "won" : ""}`}>
-        <span className="bracket-node-teams">{blueTeams}</span>
+        <span className="bracket-node-left">
+          {blue.allianceTag && <span className="bracket-alliance-tag">{blue.allianceTag}</span>}
+          <span className="bracket-node-teams">{blue.teamsText}</span>
+        </span>
         {played && <span className="bracket-node-score">{blueWon ? "1" : "0"}</span>}
       </div>
+      {advancement && (advancement.winnerTo || advancement.loserTo) && (
+        <div className="bracket-node-advancement">
+          {advancement.winnerTo && <div>W → {advancement.winnerTo}</div>}
+          {advancement.loserTo && <div>L → {advancement.loserTo}</div>}
+        </div>
+      )}
     </div>
   );
 }
@@ -52,7 +74,15 @@ interface LineSeg {
   kind: "win" | "loss";
 }
 
-export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInfo[]; currentMatchKey?: string }) {
+export function PlayoffBracket({
+  matches,
+  currentMatchKey,
+  allianceByTeam,
+}: {
+  matches: MatchInfo[];
+  currentMatchKey?: string;
+  allianceByTeam: Map<string, number>;
+}) {
   const sfMatches = matches.filter((m) => m.compLevel === "sf");
   const fMatches = matches.filter((m) => m.compLevel === "f").sort((a, b) => a.matchNumber - b.matchNumber);
   const qfMatches = matches.filter((m) => m.compLevel === "qf");
@@ -153,6 +183,8 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
         <div className="bracket-fallback-list">
           {all.map((m) => {
             const isCurrent = m.key === currentMatchKey;
+            const red = teamLabel(m.red, allianceByTeam);
+            const blue = teamLabel(m.blue, allianceByTeam);
             return (
               <div
                 key={m.key}
@@ -168,8 +200,12 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
                     </span>
                   )}
                 </div>
-                <div className="bracket-card-alliance red">{teamLabel(m.red)}</div>
-                <div className="bracket-card-alliance blue">{teamLabel(m.blue)}</div>
+                <div className="bracket-card-alliance red">
+                  {red.allianceTag && <span className="bracket-alliance-tag">{red.allianceTag}</span>} {red.teamsText}
+                </div>
+                <div className="bracket-card-alliance blue">
+                  {blue.allianceTag && <span className="bracket-alliance-tag">{blue.allianceTag}</span>} {blue.teamsText}
+                </div>
               </div>
             );
           })}
@@ -195,11 +231,18 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
       <div className="bracket-inner" ref={innerRef}>
         <svg className="bracket-lines-svg" width={svgSize.width} height={svgSize.height}>
           {lines.map((l, i) => {
-            const midX = (l.x1 + l.x2) / 2;
+            // Stagger the turn point between two "lanes" instead of always
+            // using the exact midpoint — when several lines share a round
+            // gap (e.g. multiple losers converging on the same match), a
+            // single shared turn-x bunches all their vertical segments
+            // together and makes them hard to tell apart. Alternating lanes
+            // spreads them out.
+            const lane = i % 2 === 0 ? 0.38 : 0.62;
+            const turnX = l.x1 + (l.x2 - l.x1) * lane;
             return (
               <path
                 key={i}
-                d={`M ${l.x1} ${l.y1} H ${midX} V ${l.y2} H ${l.x2}`}
+                d={`M ${l.x1} ${l.y1} H ${turnX} V ${l.y2} H ${l.x2}`}
                 className={l.kind === "win" ? "bracket-line-win" : "bracket-line-loss"}
               />
             );
@@ -218,12 +261,13 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
                   <BracketNode
                     key={num}
                     title={`Match ${num}`}
-                    redTeams={teamLabel(match.red)}
-                    blueTeams={teamLabel(match.blue)}
+                    red={teamLabel(match.red, allianceByTeam)}
+                    blue={teamLabel(match.blue, allianceByTeam)}
                     redWon={match.winner === "red"}
                     blueWon={match.winner === "blue"}
                     played={match.played}
                     isCurrent={isCurrent}
+                    advancement={SF_ADVANCEMENT[num]}
                     refCb={(el) => {
                       cardRefs.current[`sf-${num}`] = el;
                       if (isCurrent) currentCardRef.current = el;
@@ -239,8 +283,8 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
               <div className="bracket-round-title">Finals</div>
               <BracketNode
                 title={isChampionshipDecided ? "Event Champion" : "Finals"}
-                redTeams={finalsTeams ? teamLabel(finalsTeams.red) : "TBD"}
-                blueTeams={finalsTeams ? teamLabel(finalsTeams.blue) : "TBD"}
+                red={finalsTeams ? teamLabel(finalsTeams.red, allianceByTeam) : { allianceTag: null, teamsText: "TBD" }}
+                blue={finalsTeams ? teamLabel(finalsTeams.blue, allianceByTeam) : { allianceTag: null, teamsText: "TBD" }}
                 redWon={isChampionshipDecided && redFinalsWins > blueFinalsWins}
                 blueWon={isChampionshipDecided && blueFinalsWins > redFinalsWins}
                 played={finalsPlayed}
