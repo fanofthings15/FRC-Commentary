@@ -1,6 +1,7 @@
 import React from "react";
 import { Settings } from "../types";
 import { useAlliances } from "../hooks/useAlliances";
+import { ClickableTeam } from "./ClickableTeam";
 
 export function AlliancesList({ settings }: { settings: Settings }) {
   const { alliances, error, loading, reload } = useAlliances(settings);
@@ -34,7 +35,7 @@ export function AlliancesList({ settings }: { settings: Settings }) {
             <div className="alliance-card-title">{a.name}</div>
             {a.teams.map((t, i) => (
               <div key={t.number} className="alliance-card-team">
-                <span className="num">{t.number}</span>
+                <span className="num"><ClickableTeam number={t.number} /></span>
                 <span className="name">{t.name}</span>
                 {i === 0 && <span className="alliance-captain-tag">CAPTAIN</span>}
               </div>

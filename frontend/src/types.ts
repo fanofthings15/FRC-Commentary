@@ -80,3 +80,24 @@ export interface AlertMessage {
   text: string;
   sentAt: number;
 }
+
+export interface TeamEventRecord {
+  eventKey: string;
+  eventName: string;
+  startDate: string | null;
+  rank: number | null;
+  wins: number | null;
+  losses: number | null;
+  ties: number | null;
+}
+
+export interface TeamRecentInfo {
+  team: {
+    number: string;
+    name: string;
+    hometown: string;
+    rookieYear: number | null;
+  };
+  season: number;
+  events: TeamEventRecord[];
+}

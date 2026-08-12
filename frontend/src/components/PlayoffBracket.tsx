@@ -2,17 +2,34 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import { MatchInfo } from "../types";
 import { compLevelLabel, matchDisplayNumber } from "../matchLabels";
 import { SF_ADVANCEMENT, SF_ROUNDS, isDoubleElimFormat } from "../playoffBracket";
+import { ClickableTeam } from "./ClickableTeam";
 
 function teamLabel(
   teams: { number: string; name: string }[],
   allianceByTeam: Map<string, number>
-): { allianceTag: string | null; teamsText: string } {
-  if (teams.length === 0) return { allianceTag: null, teamsText: "TBD" };
+): { allianceTag: string | null; teams: { number: string; name: string }[] } {
+  if (teams.length === 0) return { allianceTag: null, teams: [] };
   const allianceNum = allianceByTeam.get(teams[0].number);
   return {
     allianceTag: allianceNum ? `A${allianceNum}` : null,
-    teamsText: teams.map((t) => t.number).join(", "),
+    teams,
   };
+}
+
+function TeamListInline({ teams }: { teams: { number: string; name: string }[] }) {
+  if (teams.length === 0) {
+    return <span className="bracket-tbd">TBD</span>;
+  }
+  return (
+    <>
+      {teams.map((t, i) => (
+        <React.Fragment key={t.number}>
+          {i > 0 && ", "}
+          <ClickableTeam number={t.number} />
+        </React.Fragment>
+      ))}
+    </>
+  );
 }
 
 // Compact TBA-style node: a small header plus two stacked rows (red / blue),
@@ -35,8 +52,8 @@ function BracketNode({
 }: {
   refCb: (el: HTMLDivElement | null) => void;
   title: string;
-  red: { allianceTag: string | null; teamsText: string };
-  blue: { allianceTag: string | null; teamsText: string };
+  red: { allianceTag: string | null; teams: { number: string; name: string }[] };
+  blue: { allianceTag: string | null; teams: { number: string; name: string }[] };
   redWon: boolean;
   blueWon: boolean;
   played: boolean;
@@ -52,14 +69,14 @@ function BracketNode({
       <div className={`bracket-node-row red ${played && redWon ? "won" : ""}`}>
         <span className="bracket-node-left">
           {red.allianceTag && <span className="bracket-alliance-tag">{red.allianceTag}</span>}
-          <span className="bracket-node-teams">{red.teamsText}</span>
+          <span className="bracket-node-teams"><TeamListInline teams={red.teams} /></span>
         </span>
         {played && <span className="bracket-node-score">{redScoreText ?? (redWon ? "1" : "0")}</span>}
       </div>
       <div className={`bracket-node-row blue ${played && blueWon ? "won" : ""}`}>
         <span className="bracket-node-left">
           {blue.allianceTag && <span className="bracket-alliance-tag">{blue.allianceTag}</span>}
-          <span className="bracket-node-teams">{blue.teamsText}</span>
+          <span className="bracket-node-teams"><TeamListInline teams={blue.teams} /></span>
         </span>
         {played && <span className="bracket-node-score">{blueScoreText ?? (blueWon ? "1" : "0")}</span>}
       </div>
@@ -208,10 +225,10 @@ export function PlayoffBracket({
                   )}
                 </div>
                 <div className="bracket-card-alliance red">
-                  {red.allianceTag && <span className="bracket-alliance-tag">{red.allianceTag}</span>} {red.teamsText}
+                  {red.allianceTag && <span className="bracket-alliance-tag">{red.allianceTag}</span>} <TeamListInline teams={red.teams} />
                 </div>
                 <div className="bracket-card-alliance blue">
-                  {blue.allianceTag && <span className="bracket-alliance-tag">{blue.allianceTag}</span>} {blue.teamsText}
+                  {blue.allianceTag && <span className="bracket-alliance-tag">{blue.allianceTag}</span>} <TeamListInline teams={blue.teams} />
                 </div>
               </div>
             );
@@ -290,8 +307,8 @@ export function PlayoffBracket({
               <div className="bracket-round-title">Finals</div>
               <BracketNode
                 title={isChampionshipDecided ? "Event Champion" : "Finals"}
-                red={finalsTeams ? teamLabel(finalsTeams.red, allianceByTeam) : { allianceTag: null, teamsText: "TBD" }}
-                blue={finalsTeams ? teamLabel(finalsTeams.blue, allianceByTeam) : { allianceTag: null, teamsText: "TBD" }}
+                red={finalsTeams ? teamLabel(finalsTeams.red, allianceByTeam) : { allianceTag: null, teams: [] }}
+                blue={finalsTeams ? teamLabel(finalsTeams.blue, allianceByTeam) : { allianceTag: null, teams: [] }}
                 redWon={redFinalsWins > blueFinalsWins}
                 blueWon={blueFinalsWins > redFinalsWins}
                 played={finalsPlayed}

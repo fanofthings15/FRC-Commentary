@@ -147,4 +147,63 @@ router.get("/alliances", async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/tba/team-recent?teamNumber=1114&apiKey=...&year=2026
+router.get("/team-recent", async (req: Request, res: Response) => {
+  const teamNumber = req.query.teamNumber as string | undefined;
+  const apiKey = req.query.apiKey as string | undefined;
+  const year = (req.query.year as string | undefined) || String(new Date().getFullYear());
+
+  if (!teamNumber || !apiKey) {
+    return res.status(400).json({ error: "Missing 'teamNumber' or 'apiKey'" });
+  }
+
+  const teamKey = `frc${teamNumber}`;
+
+  try {
+    const [teamResp, eventsResp, statusResp] = await Promise.all([
+      fetch(`${TBA_BASE}/team/${teamKey}/simple`, { headers: { "X-TBA-Auth-Key": apiKey } }),
+      fetch(`${TBA_BASE}/team/${teamKey}/events/${year}/simple`, { headers: { "X-TBA-Auth-Key": apiKey } }),
+      fetch(`${TBA_BASE}/team/${teamKey}/events/${year}/statuses`, { headers: { "X-TBA-Auth-Key": apiKey } }),
+    ]);
+
+    if (!teamResp.ok) {
+      return res.status(teamResp.status).json({ error: "Team not found, or TBA rejected the request." });
+    }
+
+    const team = await teamResp.json();
+    const events = eventsResp.ok ? await eventsResp.json() : [];
+    const statuses = statusResp.ok ? await statusResp.json() : {};
+
+    const eventList = (events as any[])
+      .map((e) => {
+        const status = (statuses as any)?.[e.key];
+        const ranking = status?.qual?.ranking;
+        return {
+          eventKey: e.key,
+          eventName: e.name,
+          startDate: e.start_date || null,
+          rank: ranking?.rank ?? null,
+          wins: ranking?.record?.wins ?? null,
+          losses: ranking?.record?.losses ?? null,
+          ties: ranking?.record?.ties ?? null,
+        };
+      })
+      .filter((e) => e.startDate)
+      .sort((a, b) => (a.startDate! < b.startDate! ? 1 : -1)); // most recent first
+
+    res.json({
+      team: {
+        number: String(team.team_number),
+        name: team.nickname || team.name || teamKey,
+        hometown: hometownFor(team),
+        rookieYear: team.rookie_year ?? null,
+      },
+      season: Number(year),
+      events: eventList,
+    });
+  } catch (err: any) {
+    res.status(502).json({ error: `Could not reach The Blue Alliance. (${err.message})` });
+  }
+});
+
 export default router;

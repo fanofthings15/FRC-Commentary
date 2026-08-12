@@ -4,3 +4,5 @@ dist/
 .DS_Store
 app.exe
 app-*.exe
+tsconfig.tsbuildinfo
+*.tsbuildinfo

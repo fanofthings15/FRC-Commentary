@@ -7,6 +7,7 @@ import { PlayoffBracket } from "./PlayoffBracket";
 import { AlliancesList } from "./AlliancesList";
 import { useRankings } from "../hooks/useRankings";
 import { useAlliances } from "../hooks/useAlliances";
+import { ClickableTeam } from "./ClickableTeam";
 
 type Tab = "match" | "rankings" | "playoffs" | "alliances";
 
@@ -106,7 +107,7 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
                 {match.red.map((t) => (
                   <div key={t.number} className="match-browser-team">
                     <div className="match-browser-team-main">
-                      <span className="num">{t.number}</span>
+                      <span className="num"><ClickableTeam number={t.number} /></span>
                       <span className="name">{t.name}</span>
                     </div>
                     <div className="team-meta-line">
@@ -121,7 +122,7 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
                 {match.blue.map((t) => (
                   <div key={t.number} className="match-browser-team">
                     <div className="match-browser-team-main">
-                      <span className="num">{t.number}</span>
+                      <span className="num"><ClickableTeam number={t.number} /></span>
                       <span className="name">{t.name}</span>
                     </div>
                     <div className="team-meta-line">

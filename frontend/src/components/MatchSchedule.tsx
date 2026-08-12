@@ -2,6 +2,7 @@ import React from "react";
 import { Settings } from "../types";
 import { useMatches } from "../hooks/useMatches";
 import { compLevelLabel, matchDisplayNumber } from "../matchLabels";
+import { ClickableTeam } from "./ClickableTeam";
 
 export function MatchSchedule({ settings }: { settings: Settings }) {
   const { matches, error, loading, reload } = useMatches(settings);
@@ -29,7 +30,7 @@ export function MatchSchedule({ settings }: { settings: Settings }) {
             <div className="alliance red">
               {m.red.map((t) => (
                 <div className="team-chip" key={t.number}>
-                  <span className="num">{t.number}</span>
+                  <span className="num"><ClickableTeam number={t.number} /></span>
                   <span className="name">{t.name}</span>
                 </div>
               ))}
@@ -37,7 +38,7 @@ export function MatchSchedule({ settings }: { settings: Settings }) {
             <div className="alliance blue">
               {m.blue.map((t) => (
                 <div className="team-chip" key={t.number}>
-                  <span className="num">{t.number}</span>
+                  <span className="num"><ClickableTeam number={t.number} /></span>
                   <span className="name">{t.name}</span>
                 </div>
               ))}

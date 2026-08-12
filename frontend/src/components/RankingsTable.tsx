@@ -1,6 +1,7 @@
 import React from "react";
 import { Settings } from "../types";
 import { useRankings } from "../hooks/useRankings";
+import { ClickableTeam } from "./ClickableTeam";
 
 export function RankingsTable({
   settings,
@@ -49,7 +50,7 @@ export function RankingsTable({
           return (
             <div key={r.teamNumber} className={`rankings-row ${cls}`}>
               <span className="rankings-rank">{r.rank}</span>
-              <span className="rankings-team">{r.teamNumber}</span>
+              <span className="rankings-team"><ClickableTeam number={r.teamNumber} /></span>
               <span className="rankings-record">
                 {r.wins ?? "–"}-{r.losses ?? "–"}-{r.ties ?? "–"}
               </span>

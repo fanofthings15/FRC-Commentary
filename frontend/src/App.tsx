@@ -7,6 +7,7 @@ import { MatchSchedule } from "./components/MatchSchedule";
 import { VmixStatus } from "./components/VmixStatus";
 import { AlertsPanel } from "./components/AlertsPanel";
 import { CommentatorView } from "./components/CommentatorView";
+import { TeamPopupProvider } from "./context/TeamPopupContext";
 
 function TopBar({ onOpenSettings }: { onOpenSettings: () => void }) {
   const location = useLocation();
@@ -67,31 +68,33 @@ export default function App() {
 
   return (
     <HashRouter>
-      <div className="app-shell">
-        <Routes>
-          <Route
-            path="/commentator"
-            element={<CommentatorView settings={settings} />}
-          />
-          <Route
-            path="/"
-            element={
-              <>
-                <TopBar onOpenSettings={() => setSettingsOpen(true)} />
-                <Dashboard settings={settings} />
-              </>
-            }
-          />
-        </Routes>
+      <TeamPopupProvider settings={settings}>
+        <div className="app-shell">
+          <Routes>
+            <Route
+              path="/commentator"
+              element={<CommentatorView settings={settings} />}
+            />
+            <Route
+              path="/"
+              element={
+                <>
+                  <TopBar onOpenSettings={() => setSettingsOpen(true)} />
+                  <Dashboard settings={settings} />
+                </>
+              }
+            />
+          </Routes>
 
-        {settingsOpen && (
-          <SettingsDrawer
-            settings={settings}
-            onChange={updateSettings}
-            onClose={() => setSettingsOpen(false)}
-          />
-        )}
-      </div>
+          {settingsOpen && (
+            <SettingsDrawer
+              settings={settings}
+              onChange={updateSettings}
+              onClose={() => setSettingsOpen(false)}
+            />
+          )}
+        </div>
+      </TeamPopupProvider>
     </HashRouter>
   );
 }
