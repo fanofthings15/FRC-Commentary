@@ -33,11 +33,13 @@ export function AlliancesList({ settings }: { settings: Settings }) {
         {alliances.map((a) => (
           <div key={a.number} className="alliance-card">
             <div className="alliance-card-title">{a.name}</div>
-            {a.teams.map((t, i) => (
-              <div key={t.number} className="alliance-card-team">
+            {a.teams.map((t) => (
+              <div key={t.number} className={`alliance-card-team ${t.role === "replaced" ? "replaced" : ""}`}>
                 <span className="num"><ClickableTeam number={t.number} /></span>
                 <span className="name">{t.name}</span>
-                {i === 0 && <span className="alliance-captain-tag">CAPTAIN</span>}
+                {t.role === "captain" && <span className="alliance-captain-tag">CAPTAIN</span>}
+                {t.role === "backup" && <span className="alliance-backup-tag">BACKUP</span>}
+                {t.role === "replaced" && <span className="alliance-replaced-tag">REPLACED</span>}
               </div>
             ))}
           </div>

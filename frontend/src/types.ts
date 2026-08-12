@@ -43,7 +43,7 @@ export interface RankingEntry {
 export interface AllianceEntry {
   number: number;
   name: string;
-  teams: { number: string; name: string }[];
+  teams: { number: string; name: string; role?: string | null }[];
 }
 
 export interface MatchInfo {

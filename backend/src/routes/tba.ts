@@ -132,14 +132,35 @@ router.get("/alliances", async (req: Request, res: Response) => {
       nameByKey[t.key] = t.nickname || t.name || t.key;
     }
 
-    const cleaned = ((alliances as any[]) || []).map((a, idx) => ({
-      number: idx + 1,
-      name: a.name || `Alliance ${idx + 1}`,
-      teams: (a.picks || []).map((tk: string) => ({
-        number: tk.replace("frc", ""),
-        name: nameByKey[tk] || "",
-      })),
-    }));
+    const cleaned = ((alliances as any[]) || []).map((a, idx) => {
+      const pickKeys: string[] = a.picks || [];
+      const backupInKey: string | undefined = a.backup?.in;
+      const backupOutKey: string | undefined = a.backup?.out;
+
+      // Show all 4 if a backup robot was ever substituted in during the
+      // playoffs - not just the original 3 picks. The swapped-out team stays
+      // in the list too (tagged), so the roster reflects the whole story.
+      const allKeys = [...pickKeys];
+      if (backupInKey && !allKeys.includes(backupInKey)) {
+        allKeys.push(backupInKey);
+      }
+
+      return {
+        number: idx + 1,
+        name: a.name || `Alliance ${idx + 1}`,
+        teams: allKeys.map((tk, i) => {
+          let role: string | null = null;
+          if (i === 0) role = "captain";
+          if (tk === backupInKey) role = "backup";
+          else if (tk === backupOutKey) role = "replaced";
+          return {
+            number: tk.replace("frc", ""),
+            name: nameByKey[tk] || "",
+            role,
+          };
+        }),
+      };
+    });
 
     res.json({ alliances: cleaned });
   } catch (err: any) {

@@ -834,6 +834,30 @@ a {
   padding: 1px 4px;
 }
 
+.alliance-backup-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.alliance-replaced-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.alliance-card-team.replaced {
+  opacity: 0.55;
+}
+
 /* Commentator one-stop-shop layout */
 .commentator-shell {
   height: 100vh;

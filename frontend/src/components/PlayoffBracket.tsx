@@ -238,12 +238,25 @@ export function PlayoffBracket({
   const sfByNumber = new Map(sfMatches.map((m) => [m.setNumber, m]));
 
   // Merge all Finals games into a single result node, TBA-style, rather than
-  // showing F1/F2/F3 as separate boxes — the team lineup doesn't change
-  // between them, only the running win tally does.
+  // showing F1/F2/F3 as separate boxes — the running win tally comes from
+  // all games, and the roster is the UNION of every team that appeared in
+  // any of them (not just game 1) — otherwise a backup robot swapped in for
+  // game 2 or 3 would silently be dropped from the display.
+  function unionTeams(side: "red" | "blue") {
+    const seen = new Map<string, { number: string; name: string }>();
+    for (const m of fMatches) {
+      for (const t of m[side]) {
+        if (!seen.has(t.number)) seen.set(t.number, t);
+      }
+    }
+    return Array.from(seen.values());
+  }
+
   const redFinalsWins = fMatches.filter((m) => m.winner === "red").length;
   const blueFinalsWins = fMatches.filter((m) => m.winner === "blue").length;
   const finalsPlayed = fMatches.some((m) => m.played);
-  const finalsTeams = fMatches[0];
+  const finalsRedTeams = unionTeams("red");
+  const finalsBlueTeams = unionTeams("blue");
   const isChampionshipDecided = redFinalsWins >= 2 || blueFinalsWins >= 2;
   const isCurrentFinals = fMatches.some((m) => m.key === currentMatchKey);
 
@@ -304,8 +317,8 @@ export function PlayoffBracket({
               <div className="bracket-round-title">Finals</div>
               <BracketNode
                 title={isChampionshipDecided ? "Event Champion" : "Finals"}
-                red={finalsTeams ? teamLabel(finalsTeams.red, allianceByTeam) : { allianceTag: null, teams: [] }}
-                blue={finalsTeams ? teamLabel(finalsTeams.blue, allianceByTeam) : { allianceTag: null, teams: [] }}
+                red={teamLabel(finalsRedTeams, allianceByTeam)}
+                blue={teamLabel(finalsBlueTeams, allianceByTeam)}
                 redWon={redFinalsWins > blueFinalsWins}
                 blueWon={blueFinalsWins > redFinalsWins}
                 played={finalsPlayed}
