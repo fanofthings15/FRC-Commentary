@@ -199,6 +199,19 @@ router.get("/team-recent", async (req: Request, res: Response) => {
       .map((e) => {
         const status = (statuses as any)?.[e.key];
         const ranking = status?.qual?.ranking;
+        const playoff = status?.playoff;
+
+        // TBA's playoff status: "status" is "won" if they won the whole
+        // event; "level" tells you the deepest round they reached (e.g. "f"
+        // = they made it to Finals). Reaching Finals without winning means
+        // Finalist.
+        let award: string | null = null;
+        if (playoff?.status === "won") {
+          award = "Winner";
+        } else if (playoff?.level === "f") {
+          award = "Finalist";
+        }
+
         return {
           eventKey: e.key,
           eventName: e.name,
@@ -207,6 +220,7 @@ router.get("/team-recent", async (req: Request, res: Response) => {
           wins: ranking?.record?.wins ?? null,
           losses: ranking?.record?.losses ?? null,
           ties: ranking?.record?.ties ?? null,
+          award,
         };
       })
       .filter((e) => e.startDate)

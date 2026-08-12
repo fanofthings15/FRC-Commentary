@@ -71,7 +71,14 @@ export function TeamPopup({
             <div className="team-popup-section-title">Most recent event ({data.season})</div>
             {mostRecent ? (
               <div className="team-popup-event">
-                <div className="team-popup-event-name">{mostRecent.eventName}</div>
+                <div className="team-popup-event-name">
+                  {mostRecent.eventName}
+                  {mostRecent.award && (
+                    <span className={`team-popup-award-tag ${mostRecent.award === "Winner" ? "winner" : "finalist"}`}>
+                      {mostRecent.award === "Winner" ? "🏆 WINNER" : "FINALIST"}
+                    </span>
+                  )}
+                </div>
                 {mostRecent.rank ? (
                   <div className="team-popup-event-rank">
                     Rank #{mostRecent.rank}
@@ -95,7 +102,14 @@ export function TeamPopup({
                 <div className="team-popup-other-events">
                   {otherEvents.map((e) => (
                     <div key={e.eventKey} className="team-popup-other-event">
-                      <span>{e.eventName}</span>
+                      <span>
+                        {e.eventName}
+                        {e.award && (
+                          <span className={`team-popup-award-tag small ${e.award === "Winner" ? "winner" : "finalist"}`}>
+                            {e.award === "Winner" ? "🏆" : "F"}
+                          </span>
+                        )}
+                      </span>
                       <span className="small-note">{e.rank ? `#${e.rank}` : "—"}</span>
                     </div>
                   ))}

@@ -89,6 +89,7 @@ export interface TeamEventRecord {
   wins: number | null;
   losses: number | null;
   ties: number | null;
+  award: string | null;
 }
 
 export interface TeamRecentInfo {

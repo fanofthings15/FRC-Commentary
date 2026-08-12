@@ -1050,6 +1050,35 @@ a {
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.team-popup-award-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.team-popup-award-tag.winner {
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  background: rgba(226, 161, 58, 0.12);
+}
+
+.team-popup-award-tag.finalist {
+  color: var(--text-dim);
+  border: 1px solid var(--panel-border);
+}
+
+.team-popup-award-tag.small {
+  padding: 0px 4px;
+  font-size: 9px;
+  margin-left: 4px;
 }
 
 .team-popup-event-rank {
