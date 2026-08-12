@@ -778,6 +778,17 @@ a {
     grid-template-columns: 1fr;
     min-height: auto;
   }
+  /* Fixed heights here, not 100% — at this width each panel stacks as its
+     own auto-sized grid row, so "100%" has nothing stable to measure against
+     and ends up resizing whenever the sibling panel's content changes height
+     (e.g. switching Match Browser tabs used to visibly rescale the chat
+     panel above/below it). A fixed height keeps both panels independent;
+     tab content that's taller than this just scrolls within its own panel. */
+  .commentator-half {
+    height: 46vh;
+    min-height: 320px;
+    flex-shrink: 0;
+  }
 }
 
 .commentator-half {
