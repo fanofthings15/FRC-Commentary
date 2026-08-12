@@ -15,8 +15,13 @@ export default defineConfig({
     proxy: {
       // REST API calls
       "/api": { target: "http://localhost:3010", changeOrigin: true },
-      // Alerts WebSocket
-      "/ws": { target: "ws://localhost:3010", ws: true, changeOrigin: true },
+      // NOTE: no /ws proxy entry - it was confirmed (via live browser
+      // testing) to fail outright for this WebSocket connection even though
+      // the REST proxy above works fine. The frontend now connects directly
+      // to ws://localhost:3010/ws/alerts in dev instead, bypassing this
+      // proxy entirely (see src/wsUtils.ts) - WebSockets aren't subject to
+      // the same-origin restrictions that make proxying necessary for
+      // fetch()/XHR, so this works without needing a proxy at all.
     },
   },
   build: {

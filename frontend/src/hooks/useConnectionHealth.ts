@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Settings } from "../types";
+import { getAlertsWsUrl } from "../wsUtils";
 
 export type HealthStatus = "ok" | "bad" | "unset" | "checking";
 
@@ -56,8 +57,7 @@ export function useConnectionHealth(settings: Settings) {
   // Alerts WebSocket - checked separately since it's a persistent connection,
   // not a periodic request like the others.
   useEffect(() => {
-    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${proto}//${window.location.host}/ws/alerts`;
+    const wsUrl = getAlertsWsUrl();
     let cancelled = false;
     let socket: WebSocket;
 
