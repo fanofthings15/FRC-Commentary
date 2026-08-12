@@ -7,6 +7,7 @@ import { YouTubeChat } from "./YouTubeChat";
 import { MatchBrowser } from "./MatchBrowser";
 import { OnDeckTicker } from "./OnDeckTicker";
 import { EventQuickSwitch } from "./EventQuickSwitch";
+import { ConnectionHealthStrip } from "./ConnectionHealthStrip";
 
 export function CommentatorView({
   settings,
@@ -33,7 +34,8 @@ export function CommentatorView({
           <span className={`status-dot ${connected ? "ok" : "bad"}`} />
           {connected ? "Connected to producer" : "Not connected — check Settings"}
         </span>
-        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <ConnectionHealthStrip settings={settings} />
           <EventQuickSwitch settings={settings} onChange={onChangeSettings} />
           <span className="small-note">Commentator View</span>
         </span>

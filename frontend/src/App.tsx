@@ -9,6 +9,7 @@ import { AlertsPanel } from "./components/AlertsPanel";
 import { CommentatorView } from "./components/CommentatorView";
 import { TeamPopupProvider } from "./context/TeamPopupContext";
 import { EventQuickSwitch } from "./components/EventQuickSwitch";
+import { ConnectionHealthStrip } from "./components/ConnectionHealthStrip";
 
 function TopBar({
   settings,
@@ -26,6 +27,7 @@ function TopBar({
         <span className="tally" />
         FRC COMMENTARY
       </div>
+      <ConnectionHealthStrip settings={settings} />
       <EventQuickSwitch settings={settings} onChange={onChangeSettings} />
       <nav>
         <Link className={location.pathname === "/" ? "active" : ""} to="/">Dashboard</Link>
