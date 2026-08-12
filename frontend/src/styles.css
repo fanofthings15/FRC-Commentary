@@ -481,11 +481,12 @@ a {
 /* Tabs inside the Match Browser (Teams / Rankings) */
 .browser-tabs {
   display: flex;
-  gap: 4px;
   border-bottom: 1px solid var(--panel-border);
+  margin-bottom: 14px;
 }
 
 .browser-tabs button {
+  flex: 1;
   background: transparent;
   border: 0;
   color: var(--text-dim);
@@ -493,8 +494,8 @@ a {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 8px 4px;
-  margin-right: 16px;
+  text-align: center;
+  padding: 10px 4px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
 }
@@ -1173,6 +1174,7 @@ a {
   letter-spacing: 0.04em;
   color: var(--text-dim);
   margin-bottom: 8px;
+  text-align: center;
 }
 
 .head-to-head-row {

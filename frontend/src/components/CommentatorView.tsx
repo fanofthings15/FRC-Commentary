@@ -54,14 +54,12 @@ export function CommentatorView({
 
       <div className="commentator-grid">
         <div className="panel commentator-half">
-          <div className="panel-header"><h2>Stream Chat</h2></div>
           <div className="panel-body" style={{ padding: 0, flex: 1 }}>
             <YouTubeChat videoId={settings.youtubeVideoId} height="100%" />
           </div>
         </div>
 
         <div className="panel commentator-half">
-          <div className="panel-header"><h2>Match Browser</h2></div>
           <div className="panel-body" style={{ flex: 1, overflowY: "auto" }}>
             <MatchBrowser settings={settings} />
           </div>

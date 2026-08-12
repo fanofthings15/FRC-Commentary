@@ -54,7 +54,7 @@ export function HeadToHead({ matches, currentMatch }: { matches: MatchInfo[]; cu
 
   return (
     <div className="head-to-head">
-      <div className="head-to-head-title">These teams have met before this event</div>
+      <div className="head-to-head-title">Pre Comp Head to Head</div>
       {encounters.map((e, i) => (
         <div key={i} className="head-to-head-row">
           <ClickableTeam number={e.team1} />

@@ -96,7 +96,7 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
 
       {tab === "match" ? (
         <>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "12px 0 10px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span className="small-note">
               Match {i + 1} of {matches.length}
               {isCurrent ? " · up next" : match.played ? " · viewing a past result" : " · viewing ahead"}
