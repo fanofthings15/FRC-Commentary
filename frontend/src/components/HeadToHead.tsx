@@ -57,10 +57,9 @@ export function HeadToHead({ matches, currentMatch }: { matches: MatchInfo[]; cu
       <div className="head-to-head-title">These teams have met before this event</div>
       {encounters.map((e, i) => (
         <div key={i} className="head-to-head-row">
-          <span>
-            <ClickableTeam number={e.team1} /> vs <ClickableTeam number={e.team2} />
-          </span>
-          <span className="small-note">{e.team1Wins}-{e.team2Wins}</span>
+          <ClickableTeam number={e.team1} />
+          <span className="head-to-head-score">{e.team1Wins}-{e.team2Wins}</span>
+          <ClickableTeam number={e.team2} />
         </div>
       ))}
     </div>
