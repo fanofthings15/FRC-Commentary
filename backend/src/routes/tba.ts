@@ -241,4 +241,44 @@ router.get("/team-recent", async (req: Request, res: Response) => {
   }
 });
 
+// GET /api/tba/oprs?eventKey=2026miket&apiKey=...
+router.get("/oprs", async (req: Request, res: Response) => {
+  const eventKey = req.query.eventKey as string | undefined;
+  const apiKey = req.query.apiKey as string | undefined;
+
+  if (!eventKey || !apiKey) {
+    return res.status(400).json({ error: "Missing 'eventKey' or 'apiKey' (set both in Settings)" });
+  }
+
+  try {
+    const r = await fetch(`${TBA_BASE}/event/${eventKey}/oprs`, {
+      headers: { "X-TBA-Auth-Key": apiKey },
+    });
+    if (!r.ok) {
+      return res.status(r.status).json({ error: "TBA rejected the request. Check your API key and event key." });
+    }
+    const data = (await r.json()) as any;
+    const oprMap = data?.oprs || {};
+    const dprMap = data?.dprs || {};
+    const ccwmMap = data?.ccwms || {};
+
+    const teamNumbers = new Set<string>([
+      ...Object.keys(oprMap),
+      ...Object.keys(dprMap),
+      ...Object.keys(ccwmMap),
+    ]);
+
+    const stats = Array.from(teamNumbers).map((tk) => ({
+      teamNumber: tk.replace("frc", ""),
+      opr: oprMap[tk] ?? null,
+      dpr: dprMap[tk] ?? null,
+      ccwm: ccwmMap[tk] ?? null,
+    }));
+
+    res.json({ stats });
+  } catch (err: any) {
+    res.status(502).json({ error: `Could not reach The Blue Alliance. (${err.message})` });
+  }
+});
+
 export default router;

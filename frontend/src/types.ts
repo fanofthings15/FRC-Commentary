@@ -2,6 +2,7 @@ export interface Settings {
   youtubeVideoId: string;
   tbaApiKey: string;
   tbaEventKey: string;
+  recentEventKeys: string[];
   vmixHost: string;
   vmixPort: string;
   telestratorUrl: string; // optional override; auto-derived from vmixHost/vmixPort when empty
@@ -11,6 +12,7 @@ export const DEFAULT_SETTINGS: Settings = {
   youtubeVideoId: "",
   tbaApiKey: "",
   tbaEventKey: "",
+  recentEventKeys: [],
   vmixHost: "",
   vmixPort: "8088",
   telestratorUrl: "",
@@ -73,6 +75,13 @@ export interface VmixStatus {
   streaming: boolean;
   external: boolean;
   inputs: VmixInput[];
+}
+
+export interface OprEntry {
+  teamNumber: string;
+  opr: number | null;
+  dpr: number | null;
+  ccwm: number | null;
 }
 
 export interface AlertMessage {

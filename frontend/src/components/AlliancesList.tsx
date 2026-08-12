@@ -2,9 +2,10 @@ import React from "react";
 import { Settings } from "../types";
 import { useAlliances } from "../hooks/useAlliances";
 import { ClickableTeam } from "./ClickableTeam";
+import { StaleBanner } from "./StaleBanner";
 
 export function AlliancesList({ settings }: { settings: Settings }) {
-  const { alliances, error, loading, reload } = useAlliances(settings);
+  const { alliances, error, loading, lastUpdated, isStale, reload } = useAlliances(settings);
 
   if (!settings.tbaApiKey || !settings.tbaEventKey) {
     return <div className="empty-state">Add your TBA API key and event key in Settings to load alliances.</div>;
@@ -24,6 +25,8 @@ export function AlliancesList({ settings }: { settings: Settings }) {
 
   return (
     <div>
+      {isStale && <StaleBanner lastUpdated={lastUpdated} />}
+
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
         <span className="small-note">{loading ? "Refreshing…" : `${alliances.length} alliances`}</span>
         <button className="btn" onClick={reload}>Refresh</button>

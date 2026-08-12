@@ -8,8 +8,17 @@ import { VmixStatus } from "./components/VmixStatus";
 import { AlertsPanel } from "./components/AlertsPanel";
 import { CommentatorView } from "./components/CommentatorView";
 import { TeamPopupProvider } from "./context/TeamPopupContext";
+import { EventQuickSwitch } from "./components/EventQuickSwitch";
 
-function TopBar({ onOpenSettings }: { onOpenSettings: () => void }) {
+function TopBar({
+  settings,
+  onChangeSettings,
+  onOpenSettings,
+}: {
+  settings: ReturnType<typeof useSettings>["settings"];
+  onChangeSettings: (partial: Partial<ReturnType<typeof useSettings>["settings"]>) => void;
+  onOpenSettings: () => void;
+}) {
   const location = useLocation();
   return (
     <div className="topbar">
@@ -17,6 +26,7 @@ function TopBar({ onOpenSettings }: { onOpenSettings: () => void }) {
         <span className="tally" />
         FRC COMMENTARY
       </div>
+      <EventQuickSwitch settings={settings} onChange={onChangeSettings} />
       <nav>
         <Link className={location.pathname === "/" ? "active" : ""} to="/">Dashboard</Link>
         <Link className={location.pathname === "/commentator" ? "active" : ""} to="/commentator">Commentator View</Link>
@@ -73,13 +83,13 @@ export default function App() {
           <Routes>
             <Route
               path="/commentator"
-              element={<CommentatorView settings={settings} />}
+              element={<CommentatorView settings={settings} onChangeSettings={updateSettings} />}
             />
             <Route
               path="/"
               element={
                 <>
-                  <TopBar onOpenSettings={() => setSettingsOpen(true)} />
+                  <TopBar settings={settings} onChangeSettings={updateSettings} onOpenSettings={() => setSettingsOpen(true)} />
                   <Dashboard settings={settings} />
                 </>
               }

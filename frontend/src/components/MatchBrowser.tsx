@@ -7,14 +7,18 @@ import { PlayoffBracket } from "./PlayoffBracket";
 import { AlliancesList } from "./AlliancesList";
 import { useRankings } from "../hooks/useRankings";
 import { useAlliances } from "../hooks/useAlliances";
+import { useOprs } from "../hooks/useOprs";
 import { ClickableTeam } from "./ClickableTeam";
+import { StaleBanner } from "./StaleBanner";
+import { HeadToHead } from "./HeadToHead";
 
 type Tab = "match" | "rankings" | "playoffs" | "alliances";
 
 export function MatchBrowser({ settings }: { settings: Settings }) {
-  const { matches, error, loading, reload } = useMatches(settings);
+  const { matches, error, loading, lastUpdated, isStale, reload } = useMatches(settings);
   const { rankings } = useRankings(settings);
   const { alliances } = useAlliances(settings);
+  const { oprs } = useOprs(settings);
   const [index, setIndex] = useState<number | null>(null);
   const [tab, setTab] = useState<Tab>("match");
 
@@ -23,6 +27,12 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
     for (const r of rankings) map.set(r.teamNumber, r.rank);
     return map;
   }, [rankings]);
+
+  const oprByTeam = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const o of oprs) if (o.opr !== null) map.set(o.teamNumber, o.opr);
+    return map;
+  }, [oprs]);
 
   const allianceByTeam = useMemo(() => {
     const map = new Map<string, number>();
@@ -67,6 +77,8 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
 
   return (
     <div>
+      {isStale && <StaleBanner lastUpdated={lastUpdated} />}
+
       <div className="browser-tabs">
         <button className={tab === "match" ? "active" : ""} onClick={() => setTab("match")}>
           Teams
@@ -113,6 +125,7 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
                     <div className="team-meta-line">
                       {t.hometown && <span className="hometown">{t.hometown}</span>}
                       {rankByTeam.has(t.number) && <span className="rank-tag">Rank #{rankByTeam.get(t.number)}</span>}
+                      {oprByTeam.has(t.number) && <span className="opr-tag">OPR {oprByTeam.get(t.number)!.toFixed(1)}</span>}
                     </div>
                   </div>
                 ))}
@@ -128,12 +141,15 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
                     <div className="team-meta-line">
                       {t.hometown && <span className="hometown">{t.hometown}</span>}
                       {rankByTeam.has(t.number) && <span className="rank-tag">Rank #{rankByTeam.get(t.number)}</span>}
+                      {oprByTeam.has(t.number) && <span className="opr-tag">OPR {oprByTeam.get(t.number)!.toFixed(1)}</span>}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
+
+          <HeadToHead matches={matches} currentMatch={match} />
 
           <div className="match-browser-nav">
             <button className="btn" disabled={i === 0} onClick={() => setIndex(Math.max(0, i - 1))}>

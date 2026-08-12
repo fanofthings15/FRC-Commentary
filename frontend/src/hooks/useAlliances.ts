@@ -1,21 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AllianceEntry, Settings } from "../types";
 
 export function useAlliances(settings: Settings) {
   const [alliances, setAlliances] = useState<AllianceEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+  const hasDataRef = useRef(false);
 
   const load = useCallback(async () => {
     if (!settings.tbaApiKey || !settings.tbaEventKey) return;
     setLoading(true);
-    setError(null);
     try {
       const params = new URLSearchParams({ apiKey: settings.tbaApiKey, eventKey: settings.tbaEventKey });
       const res = await fetch(`/api/tba/alliances?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load alliances");
       setAlliances(data.alliances);
+      setError(null);
+      setLastUpdated(Date.now());
+      hasDataRef.current = true;
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -29,5 +33,5 @@ export function useAlliances(settings: Settings) {
     return () => clearInterval(interval);
   }, [load]);
 
-  return { alliances, error, loading, reload: load };
+  return { alliances, error, loading, lastUpdated, isStale: error !== null && hasDataRef.current, reload: load };
 }

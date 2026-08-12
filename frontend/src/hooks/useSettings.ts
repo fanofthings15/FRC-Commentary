@@ -62,7 +62,23 @@ export function useSettings() {
   }, [settings, loaded]);
 
   const updateSettings = useCallback((partial: Partial<Settings>) => {
-    setSettings((prev) => ({ ...prev, ...partial }));
+    setSettings((prev) => {
+      let next = { ...prev, ...partial };
+      // Whenever the active event actually changes, remember the one we're
+      // leaving so the quick-switch has somewhere to switch back to.
+      if (
+        partial.tbaEventKey &&
+        partial.tbaEventKey !== prev.tbaEventKey &&
+        prev.tbaEventKey
+      ) {
+        const history = [
+          prev.tbaEventKey,
+          ...prev.recentEventKeys.filter((k) => k !== prev.tbaEventKey && k !== partial.tbaEventKey),
+        ].slice(0, 5);
+        next = { ...next, recentEventKeys: history };
+      }
+      return next;
+    });
   }, []);
 
   return { settings, updateSettings };
