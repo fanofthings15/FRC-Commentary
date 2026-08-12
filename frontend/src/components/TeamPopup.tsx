@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Settings, TeamRecentInfo } from "../types";
+import { useOprs } from "../hooks/useOprs";
 
 export function TeamPopup({
   teamNumber,
@@ -48,6 +49,9 @@ export function TeamPopup({
     };
   }, [teamNumber, settings.tbaApiKey]);
 
+  const { oprs } = useOprs(settings);
+  const teamOpr = useMemo(() => oprs.find((o) => o.teamNumber === teamNumber)?.opr ?? null, [oprs, teamNumber]);
+
   const mostRecent = data?.events[0];
   const otherEvents = data?.events.slice(1, 4); // a few more for season context, not the whole history
 
@@ -67,6 +71,11 @@ export function TeamPopup({
             <div className="team-popup-name">{data.team.name}</div>
             {data.team.hometown && <div className="small-note">{data.team.hometown}</div>}
             {data.team.rookieYear && <div className="small-note">Rookie year {data.team.rookieYear}</div>}
+            {teamOpr !== null && settings.tbaEventKey && (
+              <div className="team-popup-opr">
+                OPR at {settings.tbaEventKey}: <strong>{teamOpr.toFixed(1)}</strong>
+              </div>
+            )}
 
             <div className="team-popup-section-title">Most recent event ({data.season})</div>
             {mostRecent ? (

@@ -1,19 +1,18 @@
 import React from "react";
 import { MatchInfo } from "../types";
-import { compLevelLabel, matchDisplayNumber } from "../matchLabels";
 import { ClickableTeam } from "./ClickableTeam";
 
-interface Encounter {
-  matchLabel: string;
+interface Grouped {
   team1: string;
   team2: string;
-  winnerTeam: string | null; // the specific team number that won, if decided
+  team1Wins: number;
+  team2Wins: number;
 }
 
-function findHeadToHead(matches: MatchInfo[], current: MatchInfo): Encounter[] {
+function findHeadToHead(matches: MatchInfo[], current: MatchInfo): Grouped[] {
   const redNums = current.red.map((t) => t.number);
   const blueNums = current.blue.map((t) => t.number);
-  const encounters: Encounter[] = [];
+  const grouped = new Map<string, Grouped>();
 
   for (const m of matches) {
     if (m.key === current.key || !m.played) continue;
@@ -31,20 +30,21 @@ function findHeadToHead(matches: MatchInfo[], current: MatchInfo): Encounter[] {
           team1Side = "blue";
           team2Side = "red";
         }
-        if (team1Side) {
-          const winnerTeam = m.winner === team1Side ? r : m.winner === team2Side ? b : null;
-          encounters.push({
-            matchLabel: `${compLevelLabel(m.compLevel)} #${matchDisplayNumber(m)}`,
-            team1: r,
-            team2: b,
-            winnerTeam,
-          });
+        if (!team1Side) continue;
+
+        const key = `${r}-${b}`;
+        let g = grouped.get(key);
+        if (!g) {
+          g = { team1: r, team2: b, team1Wins: 0, team2Wins: 0 };
+          grouped.set(key, g);
         }
+        if (m.winner === team1Side) g.team1Wins++;
+        else if (m.winner === team2Side) g.team2Wins++;
       }
     }
   }
 
-  return encounters.slice(0, 6);
+  return Array.from(grouped.values());
 }
 
 export function HeadToHead({ matches, currentMatch }: { matches: MatchInfo[]; currentMatch: MatchInfo }) {
@@ -60,10 +60,7 @@ export function HeadToHead({ matches, currentMatch }: { matches: MatchInfo[]; cu
           <span>
             <ClickableTeam number={e.team1} /> vs <ClickableTeam number={e.team2} />
           </span>
-          <span className="small-note">
-            {e.matchLabel}
-            {e.winnerTeam && ` · ${e.winnerTeam} won`}
-          </span>
+          <span className="small-note">{e.team1Wins}-{e.team2Wins}</span>
         </div>
       ))}
     </div>

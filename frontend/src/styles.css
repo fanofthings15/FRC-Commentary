@@ -474,6 +474,7 @@ a {
   display: flex;
   gap: 8px;
   margin-top: 12px;
+  margin-bottom: 14px;
   justify-content: space-between;
 }
 
@@ -519,7 +520,8 @@ a {
 
 .rankings-row {
   display: grid;
-  grid-template-columns: 50px 1fr 60px 90px;
+  grid-template-columns: 46px 1fr 64px 90px;
+  gap: 10px;
   align-items: center;
   padding: 7px 12px;
   font-family: var(--font-mono);
@@ -527,9 +529,15 @@ a {
   border-bottom: 1px solid var(--panel-border);
 }
 
+.rankings-team {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .rankings-opr {
   color: var(--text-dim);
   text-align: right;
+  white-space: nowrap;
 }
 
 .rankings-row:last-child {
@@ -1038,6 +1046,18 @@ a {
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 4px;
+}
+
+.team-popup-opr {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+
+.team-popup-opr strong {
+  color: var(--accent);
+  font-size: 15px;
 }
 
 .team-popup-section-title {
