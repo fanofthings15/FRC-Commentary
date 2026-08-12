@@ -1,0 +1,31 @@
+#!/bin/sh
+# Blocks any commit that would add node_modules, dist/, or compiled .exe
+# files - a hard safety net independent of .gitignore, since .gitignore only
+# stops NEW files from being tracked. If any of these were ever committed
+# before .gitignore existed (or via `git add -f`), .gitignore alone won't
+# catch it - this hook checks what's actually staged, every time.
+
+staged=$(git diff --cached --name-only)
+
+bad=$(echo "$staged" | grep -E '(^|/)(node_modules)/' || true)
+bad_dist=$(echo "$staged" | grep -E '(^|/)dist/' || true)
+bad_exe=$(echo "$staged" | grep -E '^app(-.*)?\.exe$' || true)
+
+if [ -n "$bad" ] || [ -n "$bad_dist" ] || [ -n "$bad_exe" ]; then
+  echo ""
+  echo "COMMIT BLOCKED - you're about to commit files that should never be tracked:"
+  echo ""
+  [ -n "$bad" ] && echo "$bad" | head -10
+  [ -n "$bad_dist" ] && echo "$bad_dist" | head -10
+  [ -n "$bad_exe" ] && echo "$bad_exe" | head -10
+  echo ""
+  echo "Fix it with:"
+  echo "  git reset"
+  echo "  git rm -r --cached node_modules dist app.exe 2>/dev/null"
+  echo "  git add ."
+  echo "  git status   <- check this looks right before committing again"
+  echo ""
+  exit 1
+fi
+
+exit 0

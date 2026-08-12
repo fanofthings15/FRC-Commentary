@@ -18,6 +18,23 @@ Panels:
 - [Bun](https://bun.sh) installed on the laptop/PC you'll run this from at the event
 - That machine must be on the same local network as the vMix PC
 
+## One-time setup: commit safety hook
+
+This repo has a git hook that physically blocks committing `node_modules`, `dist/`, or compiled `.exe` files — a hard safety net that works even if `.gitignore` somehow isn't respected in a given moment (this happened once already: `node_modules` got committed — 1.6 million lines — because `.gitignore` didn't exist yet at the time a `git init` happened in a folder where `npm install` had already run).
+
+**Run this once per machine**, right after cloning:
+```bash
+git config core.hooksPath .githooks
+```
+
+After that, any commit that would include those files gets blocked automatically with an explanation, on every machine where you've run that command. It's a local git setting, not something that syncs automatically — so if you set up the repo fresh on a new machine, run it there too.
+
+**Extra, optional backstop for every repo on your machine** (not just this one): set a global gitignore so `node_modules` is ignored by default everywhere, even in repos with no `.gitignore` of their own:
+```bash
+git config --global core.excludesfile ~/.gitignore_global
+echo "node_modules/" >> ~/.gitignore_global
+```
+
 ## Project layout
 
 ```
