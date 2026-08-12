@@ -88,7 +88,7 @@ export function RankingsTable({
         <div className="rankings-row rankings-head">
           <button className="rankings-sort-btn" onClick={() => toggleSort("rank")}>Rank{arrow("rank")}</button>
           <button className="rankings-sort-btn" onClick={() => toggleSort("team")}>Team{arrow("team")}</button>
-          <button className="rankings-sort-btn rankings-sort-btn-right" onClick={() => toggleSort("opr")}>OPR{arrow("opr")}</button>
+          <button className="rankings-sort-btn" onClick={() => toggleSort("opr")}>OPR{arrow("opr")}</button>
           <span>W-L-T</span>
         </div>
         {sorted.map((r) => {

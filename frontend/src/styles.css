@@ -568,10 +568,6 @@ a {
   width: 100%;
 }
 
-.rankings-sort-btn-right {
-  text-align: right;
-}
-
 .rankings-sort-btn:hover {
   color: var(--text);
 }
