@@ -11,13 +11,16 @@
 // is correct there.
 export function getAlertsWsUrl(): string {
   if (import.meta.env.DEV) {
-    // Explicit IPv4 loopback, not "localhost" - Firefox in particular can
-    // resolve "localhost" to the IPv6 loopback (::1), which may not match
-    // whatever interface the backend actually ended up bound to. This is
-    // exactly the kind of thing that makes a connection succeed when
-    // initiated by Node (e.g. Vite's own proxy) but fail when initiated
-    // directly by the browser.
-    return "ws://127.0.0.1:3010/ws/alerts";
+    const host = window.location.hostname;
+    // "localhost" resolves inconsistently between IPv4/IPv6 in some
+    // browsers (confirmed: this caused a real connection failure in
+    // Firefox) - force explicit IPv4 loopback for the same-machine case.
+    // When the page was loaded from another device on the network,
+    // window.location.hostname is already a concrete LAN IP with no such
+    // ambiguity, so use it directly - that's what makes alerts work when
+    // accessing the dev build from a second computer.
+    const wsHost = host === "localhost" || host === "127.0.0.1" ? "127.0.0.1" : host;
+    return `ws://${wsHost}:3010/ws/alerts`;
   }
   const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
   return `${proto}//${window.location.host}/ws/alerts`;
