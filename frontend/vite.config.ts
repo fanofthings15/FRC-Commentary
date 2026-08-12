@@ -14,7 +14,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // REST API calls
-      "/api": { target: "http://localhost:3010", changeOrigin: true },
+      "/api": { target: "http://127.0.0.1:3010", changeOrigin: true },
       // NOTE: no /ws proxy entry - it was confirmed (via live browser
       // testing) to fail outright for this WebSocket connection even though
       // the REST proxy above works fine. The frontend now connects directly

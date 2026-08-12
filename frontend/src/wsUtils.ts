@@ -11,7 +11,13 @@
 // is correct there.
 export function getAlertsWsUrl(): string {
   if (import.meta.env.DEV) {
-    return "ws://localhost:3010/ws/alerts";
+    // Explicit IPv4 loopback, not "localhost" - Firefox in particular can
+    // resolve "localhost" to the IPv6 loopback (::1), which may not match
+    // whatever interface the backend actually ended up bound to. This is
+    // exactly the kind of thing that makes a connection succeed when
+    // initiated by Node (e.g. Vite's own proxy) but fail when initiated
+    // directly by the browser.
+    return "ws://127.0.0.1:3010/ws/alerts";
   }
   const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
   return `${proto}//${window.location.host}/ws/alerts`;

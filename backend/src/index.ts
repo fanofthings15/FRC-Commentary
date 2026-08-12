@@ -76,9 +76,9 @@ app.use("/api/settings", settingsRouter);
 const server = http.createServer(app);
 attachAlertsWebSocket(server);
 
-server.listen(PORT, () => {
-  console.log(`FRC Commentary server listening on http://localhost:${PORT}`);
-  console.log(`Alerts WebSocket at ws://localhost:${PORT}/ws/alerts`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`FRC Commentary server listening on http://127.0.0.1:${PORT}`);
+  console.log(`Alerts WebSocket at ws://127.0.0.1:${PORT}/ws/alerts`);
   if (uiDir) {
     console.log(`Serving built frontend from ${uiDir}`);
   } else {
