@@ -999,61 +999,65 @@ a {
 }
 
 .team-popup {
-  width: 360px;
+  width: 480px;
   max-width: 100%;
-  max-height: 80vh;
+  max-height: 85vh;
   overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
-  padding: 18px 20px;
+  padding: 24px 28px;
 }
 
 .team-popup-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .team-popup-number {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 32px;
   color: var(--accent);
 }
 
 .team-popup-name {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .team-popup-section-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-dim);
-  margin: 14px 0 8px;
+  margin: 18px 0 10px;
 }
 
 .team-popup-event {
   border: 1px solid var(--panel-border);
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 14px 16px;
   background: #0f1319;
 }
 
 .team-popup-event-name {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   margin-bottom: 4px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.team-popup .small-note {
+  font-size: 13px;
 }
 
 .team-popup-award-tag {
@@ -1083,20 +1087,20 @@ a {
 
 .team-popup-event-rank {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 16px;
   color: var(--accent);
 }
 
 .team-popup-other-events {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .team-popup-other-event {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  padding: 4px 0;
+  font-size: 14px;
+  padding: 6px 0;
   border-bottom: 1px solid var(--panel-border);
 }
