@@ -16,7 +16,7 @@ export function CommentatorView({
   settings: Settings;
   onChangeSettings: (partial: Partial<Settings>) => void;
 }) {
-  const { connected, lastAlert } = useAlertsSocket();
+  const { lastAlert } = useAlertsSocket();
   const { matches } = useMatches(settings);
   const [visible, setVisible] = useState(false);
 
@@ -30,12 +30,8 @@ export function CommentatorView({
   return (
     <div className="commentator-shell">
       <div className="commentator-status-bar">
-        <span>
-          <span className={`status-dot ${connected ? "ok" : "bad"}`} />
-          {connected ? "Connected to producer" : "Not connected — check Settings"}
-        </span>
+        <ConnectionHealthStrip settings={settings} />
         <span style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <ConnectionHealthStrip settings={settings} />
           <EventQuickSwitch settings={settings} onChange={onChangeSettings} />
           <span className="small-note">Commentator View</span>
         </span>

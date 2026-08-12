@@ -15,7 +15,7 @@ function labelSuffix(status: HealthStatus): string {
 }
 
 export function ConnectionHealthStrip({ settings }: { settings: Settings }) {
-  const { backend, tba, vmix } = useConnectionHealth(settings);
+  const { backend, tba, vmix, alerts } = useConnectionHealth(settings);
 
   return (
     <div className="health-strip">
@@ -30,6 +30,10 @@ export function ConnectionHealthStrip({ settings }: { settings: Settings }) {
       <span>
         <span className={`status-dot ${dotClass(vmix)}`} />
         vMix{labelSuffix(vmix)}
+      </span>
+      <span>
+        <span className={`status-dot ${dotClass(alerts)}`} />
+        Alerts{labelSuffix(alerts)}
       </span>
     </div>
   );

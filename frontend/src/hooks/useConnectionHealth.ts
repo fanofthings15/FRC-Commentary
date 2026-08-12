@@ -7,6 +7,7 @@ export function useConnectionHealth(settings: Settings) {
   const [backend, setBackend] = useState<HealthStatus>("checking");
   const [tba, setTba] = useState<HealthStatus>("checking");
   const [vmix, setVmix] = useState<HealthStatus>("checking");
+  const [alerts, setAlerts] = useState<HealthStatus>("checking");
 
   useEffect(() => {
     let cancelled = false;
@@ -52,5 +53,35 @@ export function useConnectionHealth(settings: Settings) {
     };
   }, [settings.tbaApiKey, settings.tbaEventKey, settings.vmixHost, settings.vmixPort]);
 
-  return { backend, tba, vmix };
+  // Alerts WebSocket - checked separately since it's a persistent connection,
+  // not a periodic request like the others.
+  useEffect(() => {
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${proto}//${window.location.host}/ws/alerts`;
+    let cancelled = false;
+    let socket: WebSocket;
+
+    function connect() {
+      setAlerts((prev) => (prev === "ok" ? prev : "checking"));
+      socket = new WebSocket(wsUrl);
+      socket.onopen = () => {
+        if (!cancelled) setAlerts("ok");
+      };
+      socket.onclose = () => {
+        if (!cancelled) {
+          setAlerts("bad");
+          setTimeout(connect, 3000);
+        }
+      };
+      socket.onerror = () => socket.close();
+    }
+
+    connect();
+    return () => {
+      cancelled = true;
+      socket?.close();
+    };
+  }, []);
+
+  return { backend, tba, vmix, alerts };
 }
