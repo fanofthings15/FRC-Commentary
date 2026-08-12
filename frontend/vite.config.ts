@@ -14,9 +14,9 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // REST API calls
-      "/api": { target: "http://localhost:3010" },
+      "/api": { target: "http://localhost:3010", changeOrigin: true },
       // Alerts WebSocket
-      "/ws": { target: "http://localhost:3010", ws: true },
+      "/ws": { target: "ws://localhost:3010", ws: true, changeOrigin: true },
     },
   },
   build: {
