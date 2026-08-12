@@ -5,13 +5,21 @@ import { compLevelLabel } from "../matchLabels";
 import { RankingsTable } from "./RankingsTable";
 import { PlayoffBracket } from "./PlayoffBracket";
 import { AlliancesList } from "./AlliancesList";
+import { useRankings } from "../hooks/useRankings";
 
 type Tab = "match" | "rankings" | "playoffs" | "alliances";
 
 export function MatchBrowser({ settings }: { settings: Settings }) {
   const { matches, error, loading, reload } = useMatches(settings);
+  const { rankings } = useRankings(settings);
   const [index, setIndex] = useState<number | null>(null);
   const [tab, setTab] = useState<Tab>("match");
+
+  const rankByTeam = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of rankings) map.set(r.teamNumber, r.rank);
+    return map;
+  }, [rankings]);
 
   // Default cursor: the first unplayed match, or the last match if everything's played.
   const defaultIndex = useMemo(() => {
@@ -77,7 +85,7 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
             <div className="match-browser-label">
               {compLevelLabel(match.compLevel)} #{match.matchNumber}
               {match.played && match.winner && (
-                <span className={`badge ${match.winner === "red" ? "program" : "preview"}`} style={{ marginLeft: 8 }}>
+                <span className={`badge ${match.winner === "red" ? "red" : "blue"}`} style={{ marginLeft: 8 }}>
                   {match.winner.toUpperCase()} WON
                 </span>
               )}
@@ -91,7 +99,10 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
                       <span className="num">{t.number}</span>
                       <span className="name">{t.name}</span>
                     </div>
-                    {t.hometown && <span className="hometown">{t.hometown}</span>}
+                    <div className="team-meta-line">
+                      {t.hometown && <span className="hometown">{t.hometown}</span>}
+                      {rankByTeam.has(t.number) && <span className="rank-tag">Rank #{rankByTeam.get(t.number)}</span>}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -103,7 +114,10 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
                       <span className="num">{t.number}</span>
                       <span className="name">{t.name}</span>
                     </div>
-                    {t.hometown && <span className="hometown">{t.hometown}</span>}
+                    <div className="team-meta-line">
+                      {t.hometown && <span className="hometown">{t.hometown}</span>}
+                      {rankByTeam.has(t.number) && <span className="rank-tag">Rank #{rankByTeam.get(t.number)}</span>}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -125,7 +139,7 @@ export function MatchBrowser({ settings }: { settings: Settings }) {
       ) : tab === "rankings" ? (
         <RankingsTable settings={settings} redTeams={redNumbers} blueTeams={blueNumbers} />
       ) : tab === "playoffs" ? (
-        <PlayoffBracket matches={matches} />
+        <PlayoffBracket matches={matches} currentMatchKey={match.key} />
       ) : (
         <AlliancesList settings={settings} />
       )}
