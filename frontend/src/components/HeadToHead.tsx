@@ -70,7 +70,7 @@ export function HeadToHead({ matches, currentMatch }: { matches: MatchInfo[]; cu
 
   return (
     <div className="head-to-head">
-      <div className="head-to-head-title">Pre Comp Head to Head</div>
+      <div className="head-to-head-title">Head to Head</div>
       {encounters.map((e) => {
         const key = `${e.team1}-${e.team2}`;
         const expanded = expandedKey === key;
