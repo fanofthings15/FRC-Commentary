@@ -3,55 +3,43 @@ import { MatchInfo } from "../types";
 import { compLevelLabel } from "../matchLabels";
 import { SF_ADVANCEMENT, SF_ROUNDS, isDoubleElimFormat } from "../playoffBracket";
 
-function TeamList({ teams }: { teams: { number: string; name: string }[] }) {
-  if (teams.length === 0) {
-    return <span className="bracket-tbd">TBD</span>;
-  }
-  return (
-    <>
-      {teams.map((t) => (
-        <span key={t.number} className="bracket-team">
-          {t.number}
-        </span>
-      ))}
-    </>
-  );
+function teamLabel(teams: { number: string; name: string }[]): string {
+  return teams.length > 0 ? teams.map((t) => t.number).join(", ") : "TBD";
 }
 
-function BracketMatchCard({
+// Compact TBA-style node: a small header plus two stacked rows (red / blue),
+// each showing the teams and a win/loss indicator once the match is played.
+function BracketNode({
   refCb,
-  match,
-  advancement,
+  title,
+  redTeams,
+  blueTeams,
+  redWon,
+  blueWon,
+  played,
   isCurrent,
 }: {
   refCb: (el: HTMLDivElement | null) => void;
-  match: MatchInfo;
-  advancement?: { winnerTo?: string; loserTo?: string };
+  title: string;
+  redTeams: string;
+  blueTeams: string;
+  redWon: boolean;
+  blueWon: boolean;
+  played: boolean;
   isCurrent?: boolean;
 }) {
   return (
-    <div className={`bracket-card ${match.played ? "played" : ""} ${isCurrent ? "current" : ""}`} ref={refCb}>
+    <div className={`bracket-node ${isCurrent ? "current" : ""}`} ref={refCb}>
       {isCurrent && <div className="bracket-here-tag">YOU ARE HERE</div>}
-      <div className="bracket-card-label">
-        Match {match.matchNumber}
-        {match.played && match.winner && (
-          <span className={`badge ${match.winner === "red" ? "red" : "blue"}`} style={{ marginLeft: 6 }}>
-            {match.winner.toUpperCase()}
-          </span>
-        )}
+      <div className="bracket-node-title">{title}</div>
+      <div className={`bracket-node-row red ${played && redWon ? "won" : ""}`}>
+        <span className="bracket-node-teams">{redTeams}</span>
+        {played && <span className="bracket-node-score">{redWon ? "1" : "0"}</span>}
       </div>
-      <div className="bracket-card-alliance red">
-        <TeamList teams={match.red} />
+      <div className={`bracket-node-row blue ${played && blueWon ? "won" : ""}`}>
+        <span className="bracket-node-teams">{blueTeams}</span>
+        {played && <span className="bracket-node-score">{blueWon ? "1" : "0"}</span>}
       </div>
-      <div className="bracket-card-alliance blue">
-        <TeamList teams={match.blue} />
-      </div>
-      {advancement && (
-        <div className="bracket-flavor">
-          {advancement.winnerTo && <div>Winner → {advancement.winnerTo}</div>}
-          {advancement.loserTo && <div>Loser → {advancement.loserTo}</div>}
-        </div>
-      )}
     </div>
   );
 }
@@ -69,7 +57,6 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
   const fMatches = matches.filter((m) => m.compLevel === "f").sort((a, b) => a.matchNumber - b.matchNumber);
   const qfMatches = matches.filter((m) => m.compLevel === "qf");
 
-  const scrollRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const currentCardRef = useRef<HTMLDivElement | null>(null);
@@ -79,6 +66,8 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
   const sfNumbers = sfMatches.map((m) => m.matchNumber);
   const doubleElim = isDoubleElimFormat(sfNumbers);
 
+  // Which match feeds into which — mirrors the standard bracket already
+  // encoded in playoffBracket.ts (both winner and loser advancement paths).
   useLayoutEffect(() => {
     if (!doubleElim) return;
 
@@ -86,7 +75,7 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
       if (!label) return null;
       const m = label.match(/Match (\d+)/);
       if (m) return `sf-${m[1]}`;
-      if (label === "Finals" && fMatches.length > 0) return "f-0";
+      if (label === "Finals" && fMatches.length > 0) return "final";
       return null;
     }
 
@@ -159,7 +148,7 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
     return (
       <div>
         <p className="small-note" style={{ marginBottom: 10 }}>
-          This event's bracket doesn't match the standard 8-alliance double-elimination format, so advancement labels aren't shown — just the matches themselves.
+          This event's bracket doesn't match the standard 8-alliance double-elimination format, so the bracket view isn't shown — just the matches themselves.
         </p>
         <div className="bracket-fallback-list">
           {all.map((m) => {
@@ -179,8 +168,8 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
                     </span>
                   )}
                 </div>
-                <div className="bracket-card-alliance red"><TeamList teams={m.red} /></div>
-                <div className="bracket-card-alliance blue"><TeamList teams={m.blue} /></div>
+                <div className="bracket-card-alliance red">{teamLabel(m.red)}</div>
+                <div className="bracket-card-alliance blue">{teamLabel(m.blue)}</div>
               </div>
             );
           })}
@@ -191,20 +180,26 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
 
   const sfByNumber = new Map(sfMatches.map((m) => [m.matchNumber, m]));
 
+  // Merge all Finals games into a single result node, TBA-style, rather than
+  // showing F1/F2/F3 as separate boxes — the team lineup doesn't change
+  // between them, only the running win tally does.
+  const redFinalsWins = fMatches.filter((m) => m.winner === "red").length;
+  const blueFinalsWins = fMatches.filter((m) => m.winner === "blue").length;
+  const finalsPlayed = fMatches.some((m) => m.played);
+  const finalsTeams = fMatches[0];
+  const isChampionshipDecided = redFinalsWins >= 2 || blueFinalsWins >= 2;
+  const isCurrentFinals = fMatches.some((m) => m.key === currentMatchKey);
+
   return (
-    <div className="bracket-scroll" ref={scrollRef}>
+    <div className="bracket-scroll">
       <div className="bracket-inner" ref={innerRef}>
-        <svg
-          className="bracket-lines-svg"
-          width={svgSize.width}
-          height={svgSize.height}
-        >
+        <svg className="bracket-lines-svg" width={svgSize.width} height={svgSize.height}>
           {lines.map((l, i) => {
             const midX = (l.x1 + l.x2) / 2;
             return (
               <path
                 key={i}
-                d={`M ${l.x1} ${l.y1} C ${midX} ${l.y1}, ${midX} ${l.y2}, ${l.x2} ${l.y2}`}
+                d={`M ${l.x1} ${l.y1} H ${midX} V ${l.y2} H ${l.x2}`}
                 className={l.kind === "win" ? "bracket-line-win" : "bracket-line-loss"}
               />
             );
@@ -220,10 +215,14 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
                 if (!match) return null;
                 const isCurrent = match.key === currentMatchKey;
                 return (
-                  <BracketMatchCard
+                  <BracketNode
                     key={num}
-                    match={match}
-                    advancement={SF_ADVANCEMENT[num]}
+                    title={`Match ${num}`}
+                    redTeams={teamLabel(match.red)}
+                    blueTeams={teamLabel(match.blue)}
+                    redWon={match.winner === "red"}
+                    blueWon={match.winner === "blue"}
+                    played={match.played}
                     isCurrent={isCurrent}
                     refCb={(el) => {
                       cardRefs.current[`sf-${num}`] = el;
@@ -236,23 +235,26 @@ export function PlayoffBracket({ matches, currentMatchKey }: { matches: MatchInf
           ))}
 
           {fMatches.length > 0 && (
-            <div className="bracket-round">
+            <div className="bracket-round bracket-round-final">
               <div className="bracket-round-title">Finals</div>
-              {fMatches.map((m, idx) => {
-                const isCurrent = m.key === currentMatchKey;
-                return (
-                  <BracketMatchCard
-                    key={m.key}
-                    match={m}
-                    isCurrent={isCurrent}
-                    refCb={(el) => {
-                      cardRefs.current[`f-${idx}`] = el;
-                      if (isCurrent) currentCardRef.current = el;
-                    }}
-                  />
-                );
-              })}
-              <div className="bracket-flavor">First alliance to 2 wins is Event Champion.</div>
+              <BracketNode
+                title={isChampionshipDecided ? "Event Champion" : "Finals"}
+                redTeams={finalsTeams ? teamLabel(finalsTeams.red) : "TBD"}
+                blueTeams={finalsTeams ? teamLabel(finalsTeams.blue) : "TBD"}
+                redWon={isChampionshipDecided && redFinalsWins > blueFinalsWins}
+                blueWon={isChampionshipDecided && blueFinalsWins > redFinalsWins}
+                played={finalsPlayed}
+                isCurrent={isCurrentFinals}
+                refCb={(el) => {
+                  cardRefs.current["final"] = el;
+                  if (isCurrentFinals) currentCardRef.current = el;
+                }}
+              />
+              {finalsPlayed && (
+                <div className="bracket-flavor" style={{ marginTop: 8 }}>
+                  {redFinalsWins} - {blueFinalsWins} · first to 2 wins is Event Champion
+                </div>
+              )}
             </div>
           )}
         </div>

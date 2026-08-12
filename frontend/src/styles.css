@@ -687,6 +687,70 @@ a {
   gap: 8px;
 }
 
+/* Compact TBA-style bracket node: header + two score rows */
+.bracket-node {
+  position: relative;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: #0f1319;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.bracket-node.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(226, 161, 58, 0.25) inset, 0 0 16px rgba(226, 161, 58, 0.3);
+}
+
+.bracket-node-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.bracket-node-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.bracket-node-row:last-child {
+  border-bottom: 0;
+}
+
+.bracket-node-row.red { color: #ff8577; }
+.bracket-node-row.blue { color: #7fb8ff; }
+
+.bracket-node-row.won {
+  background: rgba(226, 161, 58, 0.1);
+}
+
+.bracket-node-teams {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bracket-node-score {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text);
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.bracket-round-final {
+  justify-content: center;
+}
+
 /* Alliances tab */
 .alliances-grid {
   display: grid;
