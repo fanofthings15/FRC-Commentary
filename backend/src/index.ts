@@ -7,6 +7,7 @@ import os from "os";
 import { unzipSync } from "fflate";
 import vmixRouter from "./routes/vmix.js";
 import tbaRouter from "./routes/tba.js";
+import settingsRouter from "./routes/settings.js";
 import { attachAlertsWebSocket } from "./ws/alerts.js";
 
 // Static top-level import so Bun's compiler can statically detect and embed
@@ -70,6 +71,7 @@ if (uiDir) {
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/vmix", vmixRouter);
 app.use("/api/tba", tbaRouter);
+app.use("/api/settings", settingsRouter);
 
 const server = http.createServer(app);
 attachAlertsWebSocket(server);
