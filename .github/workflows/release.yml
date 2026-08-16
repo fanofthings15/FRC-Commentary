@@ -32,10 +32,7 @@ jobs:
       - name: Build exe
         run: bun run build:exe
 
-      - name: Rename with version
-        run: mv FRC-Commentary-Dashboard.exe "FRC-Commentary-Dashboard-${GITHUB_REF_NAME#v}.exe"
-
       - uses: softprops/action-gh-release@v2
         with:
-          files: FRC-Commentary-Dashboard-*.exe
+          files: FRC-Commentary-Dashboard.exe
           generate_release_notes: true

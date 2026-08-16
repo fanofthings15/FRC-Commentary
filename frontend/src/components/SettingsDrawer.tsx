@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Settings } from "../types";
 import { settingsToJson, parseImportedSettings } from "../settingsPortability";
+import { useAppVersion } from "../hooks/useAppVersion";
 
 interface Props {
   settings: Settings;
@@ -25,6 +26,7 @@ function Field({
 export function SettingsDrawer({ settings, onChange, onClose }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importMessage, setImportMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const appVersion = useAppVersion();
 
   function handleExport() {
     const blob = new Blob([settingsToJson(settings)], { type: "application/json" });
@@ -149,6 +151,12 @@ export function SettingsDrawer({ settings, onChange, onClose }: Props) {
         <button className="btn primary" onClick={onClose} style={{ width: "100%", marginTop: 8 }}>
           Done
         </button>
+
+        {appVersion && (
+          <div className="small-note" style={{ textAlign: "center", marginTop: 12 }}>
+            FRC Commentary Dashboard v{appVersion}
+          </div>
+        )}
       </div>
     </div>
   );

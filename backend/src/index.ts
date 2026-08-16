@@ -69,7 +69,7 @@ if (uiDir) {
   app.use(express.static(uiDir));
 }
 
-app.get("/api/health", (_req, res) => res.json({ ok: true }));
+app.get("/api/health", (_req, res) => res.json({ ok: true, version: CURRENT_VERSION }));
 app.use("/api/vmix", vmixRouter);
 app.use("/api/tba", tbaRouter);
 app.use("/api/settings", settingsRouter);
