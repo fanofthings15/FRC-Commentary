@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StreamStats } from "../types";
 
 // Polls the backend's cached YouTube stream stats. The backend owns the actual
@@ -28,5 +28,25 @@ export function useYouTubeStats() {
     };
   }, []);
 
-  return stats;
+  // Corrects the accumulated watch-hours total. The backend replies with the
+  // full updated stats, which we apply directly so the UI reflects the fix
+  // immediately rather than waiting for the next 5s poll. Returns an error
+  // message on failure (e.g. no stream tracked yet), or null on success.
+  const setWatchHours = useCallback(async (hours: number): Promise<string | null> => {
+    try {
+      const res = await fetch("/api/youtube/watch-hours", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hours }),
+      });
+      const data = await res.json();
+      if (!res.ok) return data?.error || "Could not set watch hours.";
+      setStats(data);
+      return null;
+    } catch (err: any) {
+      return `Could not reach the backend. (${err.message})`;
+    }
+  }, []);
+
+  return { stats, setWatchHours };
 }

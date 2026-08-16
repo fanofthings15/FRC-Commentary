@@ -54,11 +54,18 @@ export interface YouTubeStats {
 interface Persisted {
   videoId: string;
   watchSeconds: number;
+  offsetSeconds: number;
 }
 
 const accumulator = {
   videoId: null as string | null,
   watchSeconds: 0,
+  // Manual correction (can be negative) added on top of the integrated total.
+  // The integral is a live estimate, not a ground-truth count - a backend
+  // restart, a long network gap, or just YouTube's own reporting quirks can
+  // let it drift, so hosts can nudge it back in line with what they know is
+  // actually correct without losing the running accumulation underneath.
+  offsetSeconds: 0,
   lastConcurrent: null as number | null,
   lastSampleAt: null as number | null, // ms epoch of the previous sample
 };
@@ -83,7 +90,7 @@ function loadPersisted(): Persisted | null {
   try {
     const raw = JSON.parse(readFileSync(STATS_PATH, "utf-8"));
     if (typeof raw?.videoId === "string" && typeof raw?.watchSeconds === "number") {
-      return raw as Persisted;
+      return { offsetSeconds: 0, ...raw } as Persisted;
     }
     return null;
   } catch {
@@ -98,6 +105,7 @@ function persist(): void {
     const data: Persisted = {
       videoId: accumulator.videoId,
       watchSeconds: accumulator.watchSeconds,
+      offsetSeconds: accumulator.offsetSeconds,
     };
     writeFileSync(STATS_PATH, JSON.stringify(data));
   } catch (err) {
@@ -109,8 +117,13 @@ function persist(): void {
 // persisted total belongs to this same video.
 function startTracking(videoId: string): void {
   const persisted = loadPersisted();
+  const sameVideo = persisted?.videoId === videoId;
   accumulator.videoId = videoId;
-  accumulator.watchSeconds = persisted?.videoId === videoId ? persisted.watchSeconds : 0;
+  accumulator.watchSeconds = sameVideo ? persisted!.watchSeconds : 0;
+  // A correction only makes sense for the run it was made during - a new
+  // video means a fresh integral, so any leftover offset from a previous
+  // stream would just reintroduce the same kind of drift it was meant to fix.
+  accumulator.offsetSeconds = sameVideo ? persisted!.offsetSeconds : 0;
   accumulator.lastConcurrent = null;
   accumulator.lastSampleAt = null;
 }
@@ -189,7 +202,7 @@ async function poll(): Promise<void> {
       isLive,
       concurrentViewers: concurrent,
       viewCount,
-      watchHours: accumulator.watchSeconds / 3600,
+      watchHours: (accumulator.watchSeconds + accumulator.offsetSeconds) / 3600,
       videoId,
       lastUpdated: now,
       error: null,
@@ -200,6 +213,21 @@ async function poll(): Promise<void> {
 }
 
 export function getLatestYouTubeStats(): YouTubeStats {
+  return latest;
+}
+
+// Lets hosts type in the watch-hours total they know is correct (e.g. from
+// YouTube Studio, or just their own gut check) and stores whatever offset
+// makes our live figure match it going forward - rather than asking them to
+// compute the delta themselves. Returns the updated stats, or an error if
+// there's no stream being tracked yet to correct.
+export function setWatchHoursOffset(correctedHours: number): YouTubeStats | { error: string } {
+  if (!accumulator.videoId) {
+    return { error: "Not tracking a stream yet - set a YouTube Video ID first." };
+  }
+  accumulator.offsetSeconds = correctedHours * 3600 - accumulator.watchSeconds;
+  persist();
+  latest = { ...latest, watchHours: (accumulator.watchSeconds + accumulator.offsetSeconds) / 3600 };
   return latest;
 }
 
