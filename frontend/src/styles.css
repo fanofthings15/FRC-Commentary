@@ -1338,6 +1338,9 @@ a {
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.02);
+  /* Clip rather than let a wide number or label push past the rounded
+     corners when the box gets squeezed below its content width. */
+  overflow: hidden;
 }
 
 .stream-stat-value {
@@ -1347,6 +1350,12 @@ a {
   line-height: 1;
   color: var(--text);
   font-variant-numeric: tabular-nums;
+  /* A 7-figure view count is wider than the box can shrink to - truncate
+     with an ellipsis instead of wrapping the number onto a second line,
+     which broke the stat tile's fixed height and misaligned its neighbors. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stream-stat-label {
@@ -1358,6 +1367,9 @@ a {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Slim inline row for the commentator status header */
@@ -1376,6 +1388,7 @@ a {
 
 .stream-stats.compact .stream-stat-value {
   font-size: 18px;
+  max-width: 30vw;
 }
 
 .big-ui .stream-stat-value {
@@ -1531,6 +1544,22 @@ a {
 
   .on-deck-item {
     min-width: 100px;
+  }
+
+  /* Three stat tiles at 110px min-width each plus gaps don't fit a phone
+     width - let them go two-per-row instead of squeezing each one down
+     to where its number needs the ellipsis fallback above. */
+  .stream-stat {
+    min-width: 42%;
+  }
+
+  .stream-stat-value {
+    font-size: 24px;
+  }
+
+  .stream-stats.compact .stream-stat-value {
+    font-size: 15px;
+    max-width: 26vw;
   }
 
   .settings-drawer {
