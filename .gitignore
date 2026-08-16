@@ -2,5 +2,5 @@ node_modules/
 dist/
 .env
 .DS_Store
-app.exe
-app-*.exe
+FRC-Commentary-Dashboard.exe
+FRC-Commentary-Dashboard-*.exe

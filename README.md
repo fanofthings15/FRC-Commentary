@@ -41,7 +41,7 @@ Open **http://localhost:3010**.
 bun run build:exe
 ```
 
-Produces `app.exe` with the UI embedded — no Bun install needed to run it.
+Produces `FRC-Commentary-Dashboard.exe` with the UI embedded — no Bun install needed to run it.
 
 ## Settings (in-app)
 
