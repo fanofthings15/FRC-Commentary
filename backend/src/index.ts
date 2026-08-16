@@ -26,7 +26,6 @@ import zipFile from "../ui-dist.zip" with { type: "file" };
 // PORT env var can override it (e.g. when 3010 is already taken on a host).
 const PORT = Number(process.env.PORT) || 3010;
 
-
 // Where the built frontend's static files live, for whichever mode we're
 // running in. Returns null if there's nothing to serve yet (e.g. dev mode
 // before `vite build`, or a still-empty placeholder zip) — in that case the
