@@ -12,9 +12,13 @@ import { ConnectionHealthStrip } from "./ConnectionHealthStrip";
 export function CommentatorView({
   settings,
   onChangeSettings,
+  bigUi,
+  onToggleBigUi,
 }: {
   settings: Settings;
   onChangeSettings: (partial: Partial<Settings>) => void;
+  bigUi: boolean;
+  onToggleBigUi: () => void;
 }) {
   const { lastAlert } = useAlertsSocket();
   const { matches } = useMatches(settings);
@@ -33,6 +37,13 @@ export function CommentatorView({
         <ConnectionHealthStrip settings={settings} />
         <span style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <EventQuickSwitch settings={settings} onChange={onChangeSettings} />
+          <button
+            className={bigUi ? "btn active" : "btn"}
+            onClick={onToggleBigUi}
+            title="Scale up text and controls for a docked or distant screen"
+          >
+            {bigUi ? "Big UI: On" : "Big UI"}
+          </button>
           <span className="small-note">Commentator View</span>
         </span>
       </div>

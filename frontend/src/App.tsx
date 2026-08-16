@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { HashRouter, Routes, Route, Link, useLocation } from "react-router-dom";
 import { useSettings } from "./hooks/useSettings";
+import { useBigUi } from "./hooks/useBigUi";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { YouTubeChat } from "./components/YouTubeChat";
 import { MatchSchedule } from "./components/MatchSchedule";
@@ -15,10 +16,14 @@ function TopBar({
   settings,
   onChangeSettings,
   onOpenSettings,
+  bigUi,
+  onToggleBigUi,
 }: {
   settings: ReturnType<typeof useSettings>["settings"];
   onChangeSettings: (partial: Partial<ReturnType<typeof useSettings>["settings"]>) => void;
   onOpenSettings: () => void;
+  bigUi: boolean;
+  onToggleBigUi: () => void;
 }) {
   const location = useLocation();
   return (
@@ -32,6 +37,13 @@ function TopBar({
       <nav>
         <Link className={location.pathname === "/" ? "active" : ""} to="/">Dashboard</Link>
         <Link className={location.pathname === "/commentator" ? "active" : ""} to="/commentator">Commentator View</Link>
+        <button
+          className={bigUi ? "active" : ""}
+          onClick={onToggleBigUi}
+          title="Scale up text and controls for a docked or distant screen"
+        >
+          {bigUi ? "Big UI: On" : "Big UI"}
+        </button>
         <button onClick={onOpenSettings}>Settings</button>
       </nav>
     </div>
@@ -77,21 +89,35 @@ function Dashboard({ settings }: { settings: ReturnType<typeof useSettings>["set
 export default function App() {
   const { settings, updateSettings } = useSettings();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [bigUi, setBigUi] = useBigUi();
 
   return (
     <HashRouter>
       <TeamPopupProvider settings={settings}>
-        <div className="app-shell">
+        <div className={bigUi ? "app-shell big-ui" : "app-shell"}>
           <Routes>
             <Route
               path="/commentator"
-              element={<CommentatorView settings={settings} onChangeSettings={updateSettings} />}
+              element={
+                <CommentatorView
+                  settings={settings}
+                  onChangeSettings={updateSettings}
+                  bigUi={bigUi}
+                  onToggleBigUi={() => setBigUi((v) => !v)}
+                />
+              }
             />
             <Route
               path="/"
               element={
                 <>
-                  <TopBar settings={settings} onChangeSettings={updateSettings} onOpenSettings={() => setSettingsOpen(true)} />
+                  <TopBar
+                    settings={settings}
+                    onChangeSettings={updateSettings}
+                    onOpenSettings={() => setSettingsOpen(true)}
+                    bigUi={bigUi}
+                    onToggleBigUi={() => setBigUi((v) => !v)}
+                  />
                   <Dashboard settings={settings} />
                 </>
               }
