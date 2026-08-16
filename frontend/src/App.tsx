@@ -4,6 +4,7 @@ import { useSettings } from "./hooks/useSettings";
 import { useBigUi } from "./hooks/useBigUi";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { YouTubeChat } from "./components/YouTubeChat";
+import { StreamStats } from "./components/StreamStats";
 import { MatchSchedule } from "./components/MatchSchedule";
 import { VmixStatus } from "./components/VmixStatus";
 import { AlertsPanel } from "./components/AlertsPanel";
@@ -54,6 +55,12 @@ function Dashboard({ settings }: { settings: ReturnType<typeof useSettings>["set
   return (
     <div className="main-grid">
       <div className="col">
+        <div className="panel">
+          <div className="panel-header"><h2>Stream Stats</h2></div>
+          <div className="panel-body">
+            <StreamStats />
+          </div>
+        </div>
         <div className="panel">
           <div className="panel-header"><h2>Stream Chat</h2></div>
           <div className="panel-body" style={{ padding: 0 }}>

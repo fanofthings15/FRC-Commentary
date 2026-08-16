@@ -10,6 +10,8 @@ import { z } from "zod";
 // is below.
 export const settingsSchema = z.object({
   youtubeVideoId: z.string().default(""),
+  // YouTube Data API v3 key, used for the live viewer + watch-hour stats.
+  youtubeApiKey: z.string().default(""),
   tbaApiKey: z.string().default(""),
   tbaEventKey: z.string().default(""),
   vmixHost: z.string().default(""),

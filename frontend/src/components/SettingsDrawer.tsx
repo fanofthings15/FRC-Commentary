@@ -76,6 +76,14 @@ export function SettingsDrawer({ settings, onChange, onClose }: Props) {
         />
 
         <Field
+          label="YouTube API Key"
+          hint="Google Cloud → YouTube Data API v3 key. Powers the live viewer + watch-hour stats."
+          value={settings.youtubeApiKey}
+          onChange={(v) => onChange({ youtubeApiKey: v })}
+          placeholder="AIza…"
+        />
+
+        <Field
           label="TBA API Key"
           hint="thebluealliance.com/account → API Keys → Read API Key"
           value={settings.tbaApiKey}

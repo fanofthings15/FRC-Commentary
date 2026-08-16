@@ -1,5 +1,6 @@
 export interface Settings {
   youtubeVideoId: string;
+  youtubeApiKey: string;
   tbaApiKey: string;
   tbaEventKey: string;
   recentEventKeys: string[];
@@ -10,6 +11,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   youtubeVideoId: "",
+  youtubeApiKey: "",
   tbaApiKey: "",
   tbaEventKey: "",
   recentEventKeys: [],
@@ -99,6 +101,17 @@ export interface TeamEventRecord {
   losses: number | null;
   ties: number | null;
   award: string | null;
+}
+
+export interface StreamStats {
+  configured: boolean;
+  isLive: boolean;
+  concurrentViewers: number | null;
+  viewCount: number | null;
+  watchHours: number;
+  videoId: string | null;
+  lastUpdated: number | null;
+  error: string | null;
 }
 
 export interface TeamRecentInfo {
