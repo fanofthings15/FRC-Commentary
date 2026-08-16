@@ -1,7 +1,14 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { MatchInfo } from "../types";
 import { compLevelLabel, matchDisplayNumber } from "../matchLabels";
-import { SF_ADVANCEMENT, SF_ROUNDS, isDoubleElimFormat } from "../playoffBracket";
+import {
+  SF_ADVANCEMENT,
+  SF_ROUNDS,
+  isDoubleElimFormat,
+  FIVE_ALLIANCE_ADVANCEMENT,
+  FIVE_ALLIANCE_ROUNDS,
+  isFiveAllianceFormat,
+} from "../playoffBracket";
 import { ClickableTeam } from "./ClickableTeam";
 
 function teamLabel(
@@ -114,9 +121,16 @@ export function PlayoffBracket({
   const [svgSize, setSvgSize] = useState({ width: 0, height: 0 });
 
   const sfNumbers = sfMatches.map((m) => m.setNumber);
-  const doubleElim = isDoubleElimFormat(sfNumbers);
+  // See playoffBracket.ts - a specific event running with 5 alliances
+  // instead of 8 needs a completely different advancement map, not just a
+  // subset of the standard one. This is the only place that distinction
+  // matters; everything below just reads from `advancement`/`rounds`.
+  const fiveAlliance = isFiveAllianceFormat(sfNumbers);
+  const doubleElim = fiveAlliance || isDoubleElimFormat(sfNumbers);
+  const advancement = fiveAlliance ? FIVE_ALLIANCE_ADVANCEMENT : SF_ADVANCEMENT;
+  const rounds = fiveAlliance ? FIVE_ALLIANCE_ROUNDS : SF_ROUNDS;
 
-  // Which match feeds into which — mirrors the standard bracket already
+  // Which match feeds into which — mirrors the bracket shape already
   // encoded in playoffBracket.ts (both winner and loser advancement paths).
   useLayoutEffect(() => {
     if (!doubleElim) return;
@@ -135,7 +149,7 @@ export function PlayoffBracket({
       const innerRect = inner.getBoundingClientRect();
       const segs: LineSeg[] = [];
 
-      for (const [numStr, info] of Object.entries(SF_ADVANCEMENT)) {
+      for (const [numStr, info] of Object.entries(advancement)) {
         const sourceEl = cardRefs.current[`sf-${numStr}`];
         if (!sourceEl) continue;
         const sRect = sourceEl.getBoundingClientRect();
@@ -179,7 +193,7 @@ export function PlayoffBracket({
       observer.disconnect();
       window.removeEventListener("resize", compute);
     };
-  }, [doubleElim, matches, fMatches.length]);
+  }, [doubleElim, advancement, matches, fMatches.length]);
 
   useLayoutEffect(() => {
     if (currentCardRef.current) {
@@ -282,7 +296,7 @@ export function PlayoffBracket({
         </svg>
 
         <div className="bracket-rounds">
-          {SF_ROUNDS.map((round) => (
+          {rounds.map((round) => (
             <div className="bracket-round" key={round.title}>
               <div className="bracket-round-title">{round.title}</div>
               {round.matchNumbers.map((num) => {
@@ -299,7 +313,7 @@ export function PlayoffBracket({
                     blueWon={match.winner === "blue"}
                     played={match.played}
                     isCurrent={isCurrent}
-                    advancement={SF_ADVANCEMENT[num]}
+                    advancement={advancement[num]}
                     refCb={(el) => {
                       cardRefs.current[`sf-${num}`] = el;
                       if (isCurrent) currentCardRef.current = el;
