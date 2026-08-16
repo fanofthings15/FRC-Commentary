@@ -21,10 +21,10 @@ router.post("/watch-hours", (req: Request, res: Response) => {
     return res.status(400).json({ error: "'hours' must be a non-negative number." });
   }
   const result = setWatchHoursOffset(hours);
-  if ("error" in result) {
-    return res.status(400).json(result);
+  if (!result.ok) {
+    return res.status(400).json({ error: result.error });
   }
-  res.json(result);
+  res.json(result.stats);
 });
 
 export default router;

@@ -221,14 +221,22 @@ export function getLatestYouTubeStats(): YouTubeStats {
 // makes our live figure match it going forward - rather than asking them to
 // compute the delta themselves. Returns the updated stats, or an error if
 // there's no stream being tracked yet to correct.
-export function setWatchHoursOffset(correctedHours: number): YouTubeStats | { error: string } {
+//
+// A plain `YouTubeStats | { error: string }` union doesn't work here:
+// YouTubeStats itself carries an `error: string | null` field (for poll
+// failures), so `"error" in result` is true for a successful result too -
+// the caller can't tell success from failure by property presence. `ok`
+// disambiguates it explicitly.
+export function setWatchHoursOffset(
+  correctedHours: number
+): { ok: true; stats: YouTubeStats } | { ok: false; error: string } {
   if (!accumulator.videoId) {
-    return { error: "Not tracking a stream yet - set a YouTube Video ID first." };
+    return { ok: false, error: "Not tracking a stream yet - set a YouTube Video ID first." };
   }
   accumulator.offsetSeconds = correctedHours * 3600 - accumulator.watchSeconds;
   persist();
   latest = { ...latest, watchHours: (accumulator.watchSeconds + accumulator.offsetSeconds) / 3600 };
-  return latest;
+  return { ok: true, stats: latest };
 }
 
 // Kick off the background poller. Safe to call once at startup.
