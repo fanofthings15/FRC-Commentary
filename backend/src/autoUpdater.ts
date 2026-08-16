@@ -10,7 +10,6 @@ const RELEASES_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 
 export const CURRENT_VERSION: string = pkg.version;
 
-
 // Compares two "x.y.z"-ish version strings (a leading "v" is tolerated).
 // Returns >0 if a is newer than b, 0 if equal, <0 if a is older.
 function compareVersions(a: string, b: string): number {
@@ -85,30 +84,62 @@ async function downloadAndStage(downloadUrl: string): Promise<void> {
   const newExe = path.join(exeDir, "FRC-Commentary-Dashboard.new.exe");
   writeFileSync(newExe, bytes);
 
+  const stamp = Date.now();
+  const logPath = path.join(os.tmpdir(), `frc-commentary-update-${stamp}.log`);
+  const scriptPath = path.join(os.tmpdir(), `frc-commentary-update-${stamp}.bat`);
+  const vbsPath = path.join(os.tmpdir(), `frc-commentary-update-${stamp}.vbs`);
+
   // Windows holds an exclusive lock on a running .exe, so this process can't
   // overwrite (or reliably rename) its own file while it's still executing.
   // Standard workaround: a tiny batch script polls `tasklist` for this PID to
   // disappear, then moves the new file over the old one and relaunches - and
   // this process exits to release the lock so that move can succeed.
-  const scriptPath = path.join(os.tmpdir(), `frc-commentary-update-${Date.now()}.bat`);
+  //
+  // Two things this got wrong the first time around (a host reported a
+  // visible cmd.exe window stuck showing the tasklist/find line forever):
+  //   - The wait loop had no bound, so if the parent somehow never exits
+  //     (or `tasklist`'s "no tasks found" message happens to contain the
+  //     PID as a substring on some locale/output format) it spins forever.
+  //   - `if not errorlevel 1 ( ... goto ... )` - a goto inside a
+  //     parenthesized block - is a known-fragile batch pattern; switched to
+  //     plain `if errorlevel 1 goto`.
   const script = [
     "@echo off",
+    `>>"${logPath}" echo update helper started`,
+    "set /a TRIES=0",
     ":wait",
     `tasklist /FI "PID eq ${process.pid}" 2>NUL | find "${process.pid}" >NUL`,
-    "if not errorlevel 1 (",
-    "  timeout /t 1 /nobreak >NUL",
-    "  goto wait",
-    ")",
-    `move /Y "${newExe}" "${currentExe}"`,
+    "if errorlevel 1 goto swap",
+    "set /a TRIES+=1",
+    "if %TRIES% GEQ 60 goto giveup",
+    "timeout /t 1 /nobreak >NUL",
+    "goto wait",
+    ":swap",
+    "rem give Windows a moment to fully release the file handle after exit",
+    "timeout /t 1 /nobreak >NUL",
+    `move /Y "${newExe}" "${currentExe}" >>"${logPath}" 2>&1`,
     `start "" "${currentExe}"`,
+    "goto cleanup",
+    ":giveup",
+    `>>"${logPath}" echo gave up waiting for the old process to exit after 60s`,
+    ":cleanup",
+    `del "${vbsPath}" >NUL 2>&1`,
     `del "%~f0"`,
   ].join("\r\n");
   writeFileSync(scriptPath, script);
 
-  spawn("cmd.exe", ["/c", scriptPath], {
+  // Launch the batch script via the Windows Script Host's Run(...,0,False)
+  // instead of spawning cmd.exe directly. Bun's `windowsHide`/`detached`
+  // spawn options were unreliable here and left a visible (and effectively
+  // orphaned-looking) console window behind; WScript.Shell.Run's window-style
+  // argument is a native OS-level hide that doesn't depend on Bun's own
+  // Windows spawn handling.
+  const vbs = `CreateObject("WScript.Shell").Run "${scriptPath.replace(/"/g, '""')}", 0, False`;
+  writeFileSync(vbsPath, vbs);
+
+  spawn("wscript.exe", ["//B", vbsPath], {
     detached: true,
     stdio: "ignore",
-    windowsHide: true,
   }).unref();
 
   console.log("Update staged. Restarting to apply it...");
