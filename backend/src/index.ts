@@ -8,7 +8,9 @@ import { unzipSync } from "fflate";
 import vmixRouter from "./routes/vmix.js";
 import tbaRouter from "./routes/tba.js";
 import settingsRouter from "./routes/settings.js";
+import youtubeRouter from "./routes/youtube.js";
 import { attachAlertsWebSocket } from "./ws/alerts.js";
+import { startYouTubePolling } from "./youtubeStats.js";
 
 // Static top-level import so Bun's compiler can statically detect and embed
 // this file into the .exe when running `bun build --compile`. This always
@@ -19,7 +21,8 @@ import zipFile from "../ui-dist.zip" with { type: "file" };
 
 // Pinned deliberately — this is the one port both dev (via the Vite proxy)
 // and prod (single process) always use. Do not make this random/ephemeral.
-const PORT = 3010;
+// PORT env var can override it (e.g. when 3010 is already taken on a host).
+const PORT = Number(process.env.PORT) || 3010;
 
 function isCompiledExe(): boolean {
   return process.execPath.endsWith(".exe") && !process.execPath.endsWith("bun.exe");
@@ -72,9 +75,14 @@ app.get("/api/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/vmix", vmixRouter);
 app.use("/api/tba", tbaRouter);
 app.use("/api/settings", settingsRouter);
+app.use("/api/youtube", youtubeRouter);
 
 const server = http.createServer(app);
 attachAlertsWebSocket(server);
+
+// Start sampling YouTube stream stats in the background (reads the video ID +
+// API key from the encrypted settings store on each tick).
+startYouTubePolling();
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`FRC Commentary server listening on http://127.0.0.1:${PORT}`);

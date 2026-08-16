@@ -1321,6 +1321,71 @@ a {
 .on-deck-teams.red { color: #ff8577; }
 .on-deck-teams.blue { color: #7fb8ff; }
 
+/* Live YouTube stream stats (viewers / watch hours / total views) */
+.stream-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stream-stat {
+  flex: 1 1 0;
+  min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.stream-stat-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.stream-stat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+
+/* Slim inline row for the commentator status header */
+.stream-stats.compact {
+  gap: 8px;
+}
+
+.stream-stats.compact .stream-stat {
+  flex: 0 0 auto;
+  min-width: 0;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+}
+
+.stream-stats.compact .stream-stat-value {
+  font-size: 18px;
+}
+
+.big-ui .stream-stat-value {
+  font-size: 40px;
+}
+
+.big-ui .stream-stats.compact .stream-stat-value {
+  font-size: 24px;
+}
+
 /* Multi-event quick switch */
 .event-switch {
   position: relative;

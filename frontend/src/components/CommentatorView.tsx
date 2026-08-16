@@ -8,6 +8,7 @@ import { MatchBrowser } from "./MatchBrowser";
 import { OnDeckTicker } from "./OnDeckTicker";
 import { EventQuickSwitch } from "./EventQuickSwitch";
 import { ConnectionHealthStrip } from "./ConnectionHealthStrip";
+import { StreamStats } from "./StreamStats";
 
 export function CommentatorView({
   settings,
@@ -56,6 +57,8 @@ export function CommentatorView({
       )}
 
       <OnDeckTicker matches={matches} />
+
+      <StreamStats compact />
 
       <div className="panel commentator-toolbar-panel">
         <TelestratorLauncher settings={settings} />
