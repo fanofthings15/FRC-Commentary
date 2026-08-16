@@ -14,3 +14,11 @@ export function queryString(req: Request, name: string): string | undefined {
 export function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
+
+// True only when running as the `bun build --compile` standalone .exe, not
+// under `bun run dev`/`bun run start` (source) or the `bun.exe` runtime
+// itself. Used to gate exe-only behavior like unpacking the embedded UI or
+// checking for updates.
+export function isCompiledExe(): boolean {
+  return process.execPath.endsWith(".exe") && !process.execPath.endsWith("bun.exe");
+}

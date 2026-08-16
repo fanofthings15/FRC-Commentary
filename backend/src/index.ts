@@ -11,6 +11,8 @@ import settingsRouter from "./routes/settings.js";
 import youtubeRouter from "./routes/youtube.js";
 import { attachAlertsWebSocket } from "./ws/alerts.js";
 import { startYouTubePolling } from "./youtubeStats.js";
+import { checkForUpdate, CURRENT_VERSION } from "./autoUpdater.js";
+import { isCompiledExe } from "./util.js";
 
 // Static top-level import so Bun's compiler can statically detect and embed
 // this file into the .exe when running `bun build --compile`. This always
@@ -24,9 +26,6 @@ import zipFile from "../ui-dist.zip" with { type: "file" };
 // PORT env var can override it (e.g. when 3010 is already taken on a host).
 const PORT = Number(process.env.PORT) || 3010;
 
-function isCompiledExe(): boolean {
-  return process.execPath.endsWith(".exe") && !process.execPath.endsWith("bun.exe");
-}
 
 // Where the built frontend's static files live, for whichever mode we're
 // running in. Returns null if there's nothing to serve yet (e.g. dev mode
@@ -84,8 +83,14 @@ attachAlertsWebSocket(server);
 // API key from the encrypted settings store on each tick).
 startYouTubePolling();
 
+// Fire-and-forget: checks GitHub for a newer release and, if this is the
+// compiled Windows .exe, downloads and stages it, then exits so the staged
+// swap can complete (see autoUpdater.ts). Not awaited so a slow/unreachable
+// GitHub never delays the server actually coming up.
+void checkForUpdate();
+
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`FRC Commentary server listening on http://127.0.0.1:${PORT}`);
+  console.log(`FRC Commentary server listening on http://127.0.0.1:${PORT} (v${CURRENT_VERSION})`);
   console.log(`Alerts WebSocket at ws://127.0.0.1:${PORT}/ws/alerts`);
   if (uiDir) {
     console.log(`Serving built frontend from ${uiDir}`);
